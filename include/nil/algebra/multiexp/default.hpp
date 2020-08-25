@@ -58,21 +58,23 @@ namespace nil {
                                           typename std::vector<S>::const_iterator scalar_start, const size_t start,
                                           const size_t end, const size_t bucket_size, size_t workers_amount,
                                           const size_t n, const T one, const size_t scalar_size, operation_set<T, S> op) {
-            size_t b = std::ceil((double)scalar_size / bucket_size);
-            size_t c = std::ceil((double)b / workers_amount);
-
+            size_t b = std::ceil((double)scalar_size / bucket_size); // amount of binary blocks of the size bucke_size in scalar
+            
             if (workers_amount > b) {
                 workers_amount = b;
             }
 
+            size_t c = std::round((double)b / workers_amount); // amount of processed blocks by each worker
+
             typename std::vector<T> part_sum(b, one);
 
             size_t buckets_len = (size_t)pow(2, bucket_size);
-
+            //each worker calculates multi_exp for their binary blocks of the scalars
             // do parallel for j
             for (size_t j = 0; j < workers_amount; ++j) {
-                for (size_t k = 0; k <= c - 1; ++k) {
-
+                // last actor may have different amount of blocks for processing than others
+                size_t worker_blocks_number = j != workers_amount - 1 ? c : b % (j * c);
+                for (size_t k = 0; k < worker_blocks_number; ++k) {
                     size_t bucket_start = j * bucket_size * c + k * bucket_size;
                     typename std::vector<T> buckets(buckets_len, one);
 
@@ -85,7 +87,8 @@ namespace nil {
                     }
 
                     T acc = one;
-
+                    //aggregate buckets
+                    //e.g. 3A + 2B + C = (A + (A + B + (A + B + C)), here C lies in bucket[0]
                     for (size_t i = 0; i < buckets_len; ++i) {
                         acc = op.base_op(acc, buckets[buckets_len - i - 1]);
                         part_sum[j * c + k] = op.base_op(part_sum[j * c + k], acc);
@@ -152,7 +155,6 @@ namespace nil {
         T result_aggregation(typename std::vector<std::vector<T>> &r, const size_t L, const size_t num_groups, const size_t bucket_size, const T one,
                             operation_set<T, S> op) {
             typename std::vector<T> part_res(L, one);
-            std::cout<< r.capacity() << std::endl;
             //in parallel for i
             for (size_t i = 0; i < L; ++i) {
                 part_res[i] = sum_serial(r, i, one, op);

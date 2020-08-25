@@ -227,8 +227,10 @@ void multiexp_test() {
                                             std::vector<int>{200, 757, 2}, 2, 3, 2);
     multiexp_test_case<value_type, int> test2(std::vector<value_type>(500, value_type(500)),
                                             std::vector<int>(500, 37), 5, 3, 5);
+    multiexp_test_case<value_type, int> test3(std::vector<value_type>(2000, value_type(5641651231)),
+                                            std::vector<int>(2000, 65465), 100, 10, 5);
 
-    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2 };
+    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2, test3 };
 
     for (size_t i = 0; i < tests.capacity(); i++) {
         typename std::vector<value_type> bases = tests[i].bases;
@@ -237,7 +239,7 @@ void multiexp_test() {
         typename std::vector<value_type>::const_iterator bases_iter = bases.begin();
         std::vector<int>::const_iterator scalaras_iter = scalars.begin();
 
-        value_type res = eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 10, op_set);
+        value_type res = eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 31, op_set);
         value_type naive_res = eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.capacity(), value_type::one(), op_set);
 
         if (res == naive_res) {
