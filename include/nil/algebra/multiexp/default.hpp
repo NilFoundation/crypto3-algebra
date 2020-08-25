@@ -72,8 +72,8 @@ namespace nil {
             //each worker calculates multi_exp for their binary blocks of the scalars
             // do parallel for j
             for (size_t j = 0; j < workers_amount; ++j) {
-                // last actor may have different amount of blocks for processing than others
-                size_t worker_blocks_number = j != workers_amount - 1 ? c : b % (j * c);
+                // last actor may have different amount of blocks for processing than others (edge case)
+                size_t worker_blocks_number = j != workers_amount - 1 ? c : b - (j * c);
                 for (size_t k = 0; k < worker_blocks_number; ++k) {
                     size_t bucket_start = j * bucket_size * c + k * bucket_size;
                     typename std::vector<T> buckets(buckets_len, one);
@@ -111,31 +111,29 @@ namespace nil {
         template<typename T, typename S>
         T sum_parallel(typename std::vector<std::vector<T>> elements, size_t idx, T one, operation_set<T, S> op) {
             size_t n = elements.capacity();
-            size_t log_n = std::log2(n);
-            size_t h = std::floor((double)n / log_n);
+            size_t log_n = std::round(std::log2(n));
+            size_t h = std::round((double)n / log_n);
 
             typename std::vector<T> part_res(h, one);
 
             // do parallel for i
-            for (size_t i = 0; i <= h - 1; ++i) {
-                for (size_t j = 0; j <= log_n - 1; ++j) {
+            for (size_t i = 0; i < h; ++i) {
+                size_t block_size = i != h - 1 ? log_n : n - i * log_n; // edge case
+                for (size_t j = 0; j < block_size; ++j) {
                     part_res[i] = op.base_op(part_res[i], elements[i * log_n + j][idx]);
                 }
             }
 
             size_t m = std::ceil((double)n / log_n);
 
-            while (m > log_n + 1) {
-                h = std::ceil(std::log2(m));
+            while (m > log_n) {
+                h = std::round(std::log2(m));
+                size_t parallel_workers = std::ceil((double)m / h);
 
                 // do parallel for i
-                for (size_t i = 0; i <= (m / h) - 1; ++i) {
-                    size_t d = h - 1;
-                    if (i == (m / h) - 1) {
-                        d = m - 1 - i * h;
-                    }
-
-                    for (size_t j = 1; j <= d; ++j) {
+                for (size_t i = 0; i < parallel_workers; ++i) {
+                    size_t d = i != parallel_workers - 1 ? h : m - (i * h); // edge case
+                    for (size_t j = 1; j < d; ++j) {
                         part_res[i * h] = op.base_op(part_res[i * h], part_res[i * h + j]);
                     }
                     part_res[i] = part_res[i * h];
@@ -144,7 +142,7 @@ namespace nil {
                 m = std::ceil((double)m / h);
             }
 
-            for (size_t i = 1; i <= m - 1; ++i) {
+            for (size_t i = 1; i < m; ++i) {
                 part_res[0] = op.base_op(part_res[0], part_res[i]);
             }
 
@@ -157,13 +155,12 @@ namespace nil {
             typename std::vector<T> part_res(L, one);
             //in parallel for i
             for (size_t i = 0; i < L; ++i) {
-                part_res[i] = sum_serial(r, i, one, op);
-                /*if (r.capacity() >= 50) {
-                    part_res[i] = sum_serial(r, i, one, op);
+                if (r.capacity() >= 50) { // TO DO: find a better bound
+                    part_res[i] = sum_parallel(r, i, one, op);
                 }
                 else {
                     part_res[i] = sum_serial(r, i, one, op);
-                }*/
+                }
             }
 
             T res = one;
@@ -178,7 +175,7 @@ namespace nil {
             return res;
         }
 
-
+        //TO DO: calculate scalar_size without passing it as an argument
         template<typename T, typename S>
         T eval_multi_exp(typename std::vector<T>::const_iterator vec_start,
                          typename std::vector<S>::const_iterator scalar_start, size_t num_groups,
