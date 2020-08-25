@@ -30,6 +30,8 @@
 #include <nil/algebra/fields/detail/element/fp.hpp>
 #include <nil/algebra/fields/detail/element/fp2.hpp>
 
+#include <nil/algebra/multiexp/default.hpp>
+
 using namespace nil::algebra;
 
 template <typename FieldParams>
@@ -196,6 +198,57 @@ void fields_fp2_basic_math_examples()
     //print_field_element(e1.inverse());
 }
 
+template<typename T, typename S> struct multiexp_test_case {
+        typename std::vector<T> bases;
+        typename std::vector<S> scalars;
+        size_t num_groups;
+        size_t bucket_size;
+        size_t workers_in_group;
+
+        multiexp_test_case(typename std::vector<T> bases, typename std::vector<S> scalars, size_t numb_groups, size_t bucket_size, size_t workers_in_group) {
+            this->bases = bases;
+            this->scalars = scalars;
+            this->num_groups = num_groups;
+            this->bucket_size = bucket_size;
+            this->workers_in_group = workers_in_group;
+        }
+};
+
+template<typename FieldType>
+void multiexp_test() {
+    using value_type = typename FieldType::value_type;
+
+    std::function<value_type (value_type, value_type)> base_op = [](value_type a, value_type b) -> value_type {return a * b; };
+    std::function<value_type (int, value_type)> s_op = [](int s, value_type a) -> value_type { return a.pow(s); };
+    std::function<value_type (value_type)> dbl_op = [](value_type a) -> value_type { return a * a; };
+    operation_set<value_type, int> op_set(base_op, s_op, dbl_op);
+
+    multiexp_test_case<value_type, int> test1(std::vector<value_type>{value_type(500), value_type(352546561), value_type(7)},
+                                            std::vector<int>{200, 757, 2}, 2, 3, 2);
+    multiexp_test_case<value_type, int> test2(std::vector<value_type>(500, value_type(500)),
+                                            std::vector<int>(500, 37), 5, 3, 5);
+
+    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2 };
+
+    for (size_t i = 0; i < tests.capacity(); i++) {
+        typename std::vector<value_type> bases = tests[i].bases;
+        std::vector<int> scalars = tests[i].scalars;
+
+        typename std::vector<value_type>::const_iterator bases_iter = bases.begin();
+        std::vector<int>::const_iterator scalaras_iter = scalars.begin();
+
+        value_type res = eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 10, op_set);
+        value_type naive_res = eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.capacity(), value_type::one(), op_set);
+
+        if (res == naive_res) {
+            std::cout << "Test " << i << " OK" << std::endl;
+        }
+        else {
+            std::cout << "Test " << i << " FAILED" << std::endl;
+        }   
+    }
+}
+
 int main()
 {
     std::cout << "BN128-254 Fq basic math:" << std::endl;
@@ -245,6 +298,12 @@ int main()
 
     std::cout << "BN128-254 Fq2 basic math:" << std::endl;
     fields_fp2_basic_math_examples<fields::bn128_fq2<254>>();
+
+    std::cout << "----------------------------" << std::endl;
+
+    std::cout << "MultiExpoinentation BLS12-381 Fq: " << std::endl;
+
+    multiexp_test<fields::bls12_fq<381>>();
 
     return 0;
 }
