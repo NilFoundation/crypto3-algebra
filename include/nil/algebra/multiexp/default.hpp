@@ -153,13 +153,15 @@ namespace nil {
                             operation_set<T, S> op) {
             typename std::vector<T> part_res(L, one);
             std::cout<< r.capacity() << std::endl;
+            //in parallel for i
             for (size_t i = 0; i < L; ++i) {
-                if (r.capacity() >= 50) {
+                part_res[i] = sum_serial(r, i, one, op);
+                /*if (r.capacity() >= 50) {
                     part_res[i] = sum_serial(r, i, one, op);
                 }
                 else {
                     part_res[i] = sum_serial(r, i, one, op);
-                }
+                }*/
             }
 
             T res = one;
