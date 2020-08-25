@@ -227,10 +227,12 @@ void multiexp_test() {
                                             std::vector<int>{200, 757, 2}, 2, 3, 2);
     multiexp_test_case<value_type, int> test2(std::vector<value_type>(500, value_type(500)),
                                             std::vector<int>(500, 37), 5, 3, 5);
-    multiexp_test_case<value_type, int> test3(std::vector<value_type>(2000, value_type(5641651231)),
-                                            std::vector<int>(2000, 65465), 100, 10, 5);
+    multiexp_test_case<value_type, int> test3(std::vector<value_type>(1000, value_type(5641651231)),
+                                            std::vector<int>(1000, 65465), 100, 10, 5);
+    multiexp_test_case<value_type, int> test4(std::vector<value_type>{value_type(3525465617)},
+                                            std::vector<int>{1024}, 1, 10, 1);
 
-    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2, test3 };
+    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2, test4};
 
     for (size_t i = 0; i < tests.capacity(); i++) {
         typename std::vector<value_type> bases = tests[i].bases;
@@ -242,6 +244,8 @@ void multiexp_test() {
         value_type res = eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 31, op_set);
         value_type naive_res = eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.capacity(), value_type::one(), op_set);
 
+        print_field_element(res);
+        print_field_element(naive_res);
         if (res == naive_res) {
             std::cout << "Test " << i << " OK" << std::endl;
         }
@@ -306,6 +310,19 @@ int main()
     std::cout << "MultiExpoinentation BLS12-381 Fq: " << std::endl;
 
     multiexp_test<fields::bls12_fq<381>>();
+
+    std::cout << "----------------------------" << std::endl;
+
+    std::cout << "MultiExpoinentation BN128-254 Fq: " << std::endl;
+
+    multiexp_test<fields::bn128_fq<254>>();
+
+    /*std::cout << "----------------------------" << std::endl;
+
+    std::cout << "MultiExpoinentation DSA Botan 3072: " << std::endl;
+
+    multiexp_test<fields::dsa_botan<2048>>();*/
+
 
     return 0;
 }
