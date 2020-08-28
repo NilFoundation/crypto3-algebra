@@ -88,6 +88,17 @@ void fields_fp_basic_math_examples()
 
     print_field_element(e1.pow(44410867));
 
+    std::cout << "e1 pow 1024 value: " ;
+    print_field_element(e1.pow(1024));
+    value_type e1_pow1024 = e1;
+    for (int i = 1; i < 1024; i++) {
+        e1_pow1024 = e1_pow1024 * e1;
+    }
+    std::cout<< "e1 * e1 (1024 times): ";
+    print_field_element(e1_pow1024);
+    std::cout << "Two previous values comparision: " << (e1.pow(1024) == e1_pow1024) << std::endl;
+
+
     value_type complex_eq = e1 * e3 + e1 * e4 + e2 * e3 + e2 * e4;
     value_type complex_eq1 = (e1 + e2) * (e3 + e4);
 
@@ -225,14 +236,14 @@ void multiexp_test() {
 
     multiexp_test_case<value_type, int> test1(std::vector<value_type>{value_type(500), value_type(352546561), value_type(7)},
                                             std::vector<int>{200, 757, 2}, 2, 3, 2);
-    multiexp_test_case<value_type, int> test2(std::vector<value_type>(500, value_type(500)),
-                                            std::vector<int>(500, 37), 5, 3, 5);
-    multiexp_test_case<value_type, int> test3(std::vector<value_type>(1000, value_type(5641651231)),
-                                            std::vector<int>(1000, 65465), 100, 10, 5);
+    multiexp_test_case<value_type, int> test2(std::vector<value_type>(300, value_type(500)),
+                                            std::vector<int>(300, 37), 5, 3, 5);
+    multiexp_test_case<value_type, int> test3(std::vector<value_type>(700, value_type(5641651231)),
+                                            std::vector<int>(700, 65465), 100, 10, 5);
     multiexp_test_case<value_type, int> test4(std::vector<value_type>{value_type(3525465617)},
                                             std::vector<int>{1024}, 1, 10, 1);
 
-    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2, test4};
+    std::vector<multiexp_test_case<value_type, int>> tests{ test1, test2, test3, test4};
 
     for (size_t i = 0; i < tests.capacity(); i++) {
         typename std::vector<value_type> bases = tests[i].bases;
@@ -282,8 +293,8 @@ int main()
 
     std::cout << "----------------------------" << std::endl;
 
-    std::cout << "DSA JCE 1024 basic math:" << std::endl;
-    fields_fp_basic_math_examples<fields::dsa_jce<1024>>();
+   /* std::cout << "DSA JCE 1024 basic math:" << std::endl;
+    fields_fp_basic_math_examples<fields::dsa_jce<1024>>();*/
 
 /*    std::cout << "----------------------------" << std::endl;
 
