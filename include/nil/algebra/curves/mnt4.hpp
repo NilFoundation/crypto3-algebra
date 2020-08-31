@@ -7,17 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt
 //---------------------------------------------------------------------------//
 
-#ifndef ALGEBRA_CURVES_BN128_HPP
-#define ALGEBRA_CURVES_BN128_HPP
+#ifndef ALGEBRA_CURVES_MNT4_HPP
+#define ALGEBRA_CURVES_MNT4_HPP
 
 #include <nil/algebra/curves/detail/element/curve_weierstrass.hpp>
 #include <nil/algebra/curves/detail/params/params.hpp>
+#include <nil/algebra/curves/detail/mnt4/g1.hpp>
+#include <nil/algebra/curves/detail/mnt4/g2.hpp>
 
-#include <nil/algebra/curves/detail/bn128/g1.hpp>
-#include <nil/algebra/curves/detail/bn128/g2.hpp>
-
-#include <nil/algebra/fields/bn128/fq.hpp>
-#include <nil/algebra/fields/bn128/fr.hpp>
+#include <nil/algebra/fields/mnt4/fq.hpp>
+#include <nil/algebra/fields/mnt4/fr.hpp>
 
 namespace nil {
     namespace algebra {
@@ -39,34 +38,34 @@ namespace nil {
                 v^3 = xi
                 w^2 = v
             */
-            template<std::size_t ModulusBits = 254, std::size_t GeneratorBits = CHAR_BIT>
-            struct bn128 { };
+            template<std::size_t ModulusBits>
+            struct mnt4 { };
 
             template<>
-            struct bn128<254, CHAR_BIT> {
-                constexpr static const std::size_t base_field_bits = 254;
-                typedef fields::bn128_fq<base_field_bits, CHAR_BIT> base_field_type;
+            struct mnt4<298> {
+                constexpr static const std::size_t base_field_bits = 298;
+                typedef fields::mnt4_fq<base_field_bits, CHAR_BIT> base_field_type;
                 typedef typename base_field_type::modulus_type number_type;
                 constexpr static const number_type base_field_modulus = base_field_type::modulus;
 
-                constexpr static const std::size_t scalar_field_bits = 254;
-                typedef fields::bn128_fr<scalar_field_bits, CHAR_BIT> scalar_field_type;
+                constexpr static const std::size_t scalar_field_bits = 298;
+                typedef fields::mnt4_fr<scalar_field_bits, CHAR_BIT> scalar_field_type;
                 constexpr static const number_type scalar_field_modulus = scalar_field_type::modulus;
 
                 //typedef typename detail::element_curve_weierstrass<base_field_type::value_type> value_type;
 
-                typedef typename detail::bn128_g1<254, CHAR_BIT> g1_type;
-                typedef typename detail::bn128_g2<254, CHAR_BIT> g2_type;
-                typedef typename nil::algebra::fields::detail::element_fp12_2over3over2<nil::algebra::fields::detail::arithmetic_params<bn128_fq<254, CHAR_BIT>>> gt_type;
+                typedef typename detail::mnt4_g1<298> g1_type;
+                typedef typename detail::mnt4_g2<298> g2_type;
+                typedef typename nil::algebra::fields::detail::element_fp4<nil::algebra::fields::detail::arithmetic_params<mnt4<298, CHAR_BIT>>> gt_type;
 
                 typedef std::vector<typename g1_type> g1_vector;
                 typedef std::vector<typename g2_type> g2_vector;
-
+                
                 constexpr static const number_type p = base_field_modulus;
                 constexpr static const number_type q = scalar_field_modulus;
 
-                constexpr static const number_type a = 0;
-                constexpr static const number_type b = 0x03;
+                constexpr static const number_type a = 2;
+                constexpr static const number_type b = 0x3545A27639415585EA4D523234FC3EDD2A2070A085C7B980F4E9CD21A515D4B0EF528EC0FD5_cppui298;
                 constexpr static const number_type x = 0x09;
                 constexpr static const number_type y = 0x01;
             };
@@ -75,4 +74,4 @@ namespace nil {
     }        // namespace algebra
 }    // namespace nil
 
-#endif    // ALGEBRA_CURVES_BN128_HPP
+#endif    // ALGEBRA_CURVES_MNT4_HPP
