@@ -152,7 +152,10 @@ namespace nil {
                     element_curve_weierstrass operator+=(const element_curve_weierstrass &B) {
                         
                         if (p[2].is_zero()) {
-                            return B;
+                            this->p[0] = B.p[0];
+                            this->p[1] = B.p[1];
+                            this->p[2] = B.p[2];
+                            return *this;
                         }
                         if (B.p[2].is_zero()) {
                             return *this;
@@ -172,7 +175,13 @@ namespace nil {
 
                         if (H.is_zero()) {
                             if (t3.is_zero()) {
-                                return dbl();
+                                element_curve_weierstrass dbld = this->dbl();
+
+                                this->p[0] = dbld.p[0];
+                                this->p[1] = dbld.p[1];
+                                this->p[2] = dbld.p[2];
+                                
+                                return *this;
                             } else {
                                 p[2] = FieldElementType::zero();    //not sure
                             }
