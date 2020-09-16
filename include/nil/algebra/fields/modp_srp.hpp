@@ -15,7 +15,7 @@
 
 #include <nil/algebra/fields/field.hpp>
 
-#include <nil/algebra/detail/mp_def.hpp>
+#include <nil/algebra/detail/literals.hpp>
 
 namespace nil {
     namespace algebra {
@@ -35,12 +35,15 @@ namespace nil {
             template<std::size_t ModulusBits, std::size_t GeneratorBits = CHAR_BIT>
             struct modp_srp : public field<ModulusBits, GeneratorBits> { };
 
-            template <>
+            template<>
             struct modp_srp<1024, CHAR_BIT> : public field<1024, CHAR_BIT> {
                 typedef field<1024, CHAR_BIT> policy_type;
 
                 constexpr static const std::size_t modulus_bits = policy_type::modulus_bits;
                 typedef typename policy_type::modulus_type modulus_type;
+
+                constexpr static const std::size_t number_bits = policy_type::number_bits;
+                typedef typename policy_type::number_type number_type;
 
                 constexpr static const modulus_type modulus =
                     0xEEAF0AB9ADB38DD69C33F80AFA8FC5E86072618775FF3C0B9EA2314C9C256576D674DF7496EA81D3383B4813D692C6E0E0D5D8E250B98BE48E495C1D6089DAD15DC7D7B46154D6B6CE8EF4AD69B15D4982559B297BCF1885C529F566660E57EC68EDBC3C05726CC02FD4CBF4976EAA9AFD5138FE8376435B9FC61D2FC0EB06E3_cppui1024;
@@ -50,12 +53,13 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x02;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
 
-            template <>
+            template<>
             struct modp_srp<1536, CHAR_BIT> : public field<1536, CHAR_BIT> {
                 typedef field<1536, CHAR_BIT> policy_type;
 
@@ -70,12 +74,13 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x02;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
 
-            template <>
+            template<>
             struct modp_srp<2048, CHAR_BIT> : public field<2048, CHAR_BIT> {
                 typedef field<2048, CHAR_BIT> policy_type;
 
@@ -90,12 +95,13 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x02;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
 
-            template <>
+            template<>
             struct modp_srp<3072, CHAR_BIT> : public field<3072, CHAR_BIT> {
                 typedef field<3072, CHAR_BIT> policy_type;
 
@@ -110,12 +116,13 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x05;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
 
-            template <>
+            template<>
             struct modp_srp<4096, CHAR_BIT> : public field<4096, CHAR_BIT> {
                 typedef field<4096, CHAR_BIT> policy_type;
 
@@ -130,12 +137,13 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x05;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
 
-            template <>
+            template<>
             struct modp_srp<6144, CHAR_BIT> : public field<6144, CHAR_BIT> {
                 typedef field<6144, CHAR_BIT> policy_type;
 
@@ -150,12 +158,13 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x05;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
 
-            template <>
+            template<>
             struct modp_srp<8192, CHAR_BIT> : public field<8192, CHAR_BIT> {
                 typedef field<8192, CHAR_BIT> policy_type;
 
@@ -170,7 +179,8 @@ namespace nil {
 
                 constexpr static const generator_type mul_generator = 0x13;
 
-                typedef typename detail::element_fp<detail::arithmetic_params<modp_srp<modulus_bits, generator_bits>>> value_type;
+                typedef typename detail::element_fp<detail::extension_params<modp_srp<modulus_bits, generator_bits>>>
+                    value_type;
 
                 constexpr static const std::size_t arity = 1;
             };
@@ -191,8 +201,8 @@ namespace nil {
             constexpr typename modp_srp<6144, CHAR_BIT>::generator_type const modp_srp<6144, CHAR_BIT>::mul_generator;
             constexpr typename modp_srp<8192, CHAR_BIT>::generator_type const modp_srp<8192, CHAR_BIT>::mul_generator;
 
-        }   // namespace fields
-    }    // namespace algebra
+        }    // namespace fields
+    }        // namespace algebra
 }    // namespace nil
 
 #endif    // ALGEBRA_FIELDS_MODP_SRP_HPP

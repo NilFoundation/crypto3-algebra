@@ -11,6 +11,8 @@
 #define ALGEBRA_FIELDS_ELEMENT_FP_HPP
 
 #include <nil/algebra/fields/detail/exponentiation.hpp>
+#include <boost/multiprecision/ressol.hpp>
+#include <boost/multiprecision/inverse.hpp>
 
 namespace nil {
     namespace algebra {
@@ -18,11 +20,11 @@ namespace nil {
             namespace detail {
 
                 template<typename FieldParams>
-                struct element_fp{
+                struct element_fp {
                 private:
                     typedef FieldParams policy_type;
-                public:
 
+                public:
                     typedef typename policy_type::number_type number_type;
                     typedef typename policy_type::modulus_type modulus_type;
 
@@ -32,13 +34,13 @@ namespace nil {
 
                     value_type data;
 
-                    element_fp() : data(value_type(0, modulus)){};
+                    element_fp() : data(value_type(0, modulus)) {};
 
-                    element_fp(value_type data) : data(data){};
+                    element_fp(value_type data) : data(data) {};
 
-                    element_fp(modulus_type data) : data(data, modulus){};
+                    element_fp(modulus_type data) : data(data, modulus) {};
 
-                    element_fp(size_t data) : data(data, modulus){};
+                    element_fp(size_t data) : data(data, modulus) {};
 
                     element_fp(const element_fp &B) {
                         data = B.data;
@@ -68,7 +70,7 @@ namespace nil {
                         return data != B.data;
                     }
 
-                    element_fp& operator=(const element_fp &B) {
+                    element_fp &operator=(const element_fp &B) {
                         data = B.data;
 
                         return *this;
@@ -82,13 +84,13 @@ namespace nil {
                         return element_fp(data - B.data);
                     }
 
-                    element_fp& operator-=(const element_fp &B) {
+                    element_fp &operator-=(const element_fp &B) {
                         data -= B.data;
 
                         return *this;
                     }
 
-                    element_fp& operator+=(const element_fp &B) {
+                    element_fp &operator+=(const element_fp &B) {
                         data += B.data;
 
                         return *this;
@@ -102,19 +104,22 @@ namespace nil {
                         return element_fp(data * B.data);
                     }
 
-                    element_fp dbl() const {
+                    element_fp doubled() const {
                         return element_fp(data + data);
                     }
 
                     element_fp sqrt() const {
-                        return element_fp(sqrt(data));
+                        return element_fp(ressol(data));
+                    }
+
+                    element_fp inversed() const {
+                        return element_fp(inverse_extended_euclidean_algorithm(data));
                     }
 
                     element_fp _2z_add_3x() {
-                        
                     }
 
-                    element_fp square() const {
+                    element_fp squared() const {
                         return element_fp(data * data);    // maybe can be done more effective
                     }
 
@@ -122,19 +127,14 @@ namespace nil {
                     element_fp pow(const PowerType &pwr) const {
                         return element_fp(power(*this, pwr));
                     }
-
-                    element_fp inverse() const {
-                        //return element_fp(boost::multiprecision::inverse(data));
-                        return *this;
-                    }
                 };
 
                 template<typename FieldParams>
                 constexpr typename element_fp<FieldParams>::modulus_type const element_fp<FieldParams>::modulus;
 
-            }   // namespace detail
-        }   // namespace fields
-    }    // namespace algebra
+            }    // namespace detail
+        }        // namespace fields
+    }            // namespace algebra
 }    // namespace nil
 
 #endif    // ALGEBRA_FIELDS_ELEMENT_FP_HPP

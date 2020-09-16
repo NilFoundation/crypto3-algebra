@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------//
 // Copyright (c) 2020 Mikhail Komarov <nemo@nil.foundation>
 // Copyright (c) 2020 Nikita Kaskov <nbering@nil.foundation>
+// Copyright (c) 2020 Ilias Khairullin <ilias@nil.foundation>
 //
 // Distributed under the Boost Software License, Version 1.0
 // See accompanying file LICENSE_1_0.txt or copy at
@@ -10,315 +11,369 @@
 #define BOOST_TEST_MODULE curves_algebra_test
 
 #include <iostream>
-
-#include <boost/multiprecision/cpp_modular.hpp>
-#include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/modular/modular_adaptor.hpp>
+#include <type_traits>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/data/monomorphic.hpp>
 
-#include <nil/algebra/fields/bn128/fq.hpp>
-#include <nil/algebra/fields/bn128/fr.hpp>
-#include <nil/algebra/fields/dsa_botan.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
-#include <nil/algebra/fields/bls12/fq.hpp>
-#include <nil/algebra/fields/bls12/fr.hpp>
-//#include <nil/algebra/fields/detail/params/dsa_jce.hpp>
-//#include <nil/algebra/fields/detail/params/modp_srp.hpp>
-//#include <nil/algebra/fields/detail/params/params.hpp>
-//#include <nil/algebra/fields/bn128/fr.hpp>
-//#include <nil/algebra/fields/dsa_jce.hpp>
-//#include <nil/algebra/fields/ed25519_fe.hpp>
-//#include <nil/algebra/fields/ffdhe_ietf.hpp>
-//#include <nil/algebra/fields/fp.hpp>
-//#include <nil/algebra/fields/fp2.hpp>
-//#include <nil/algebra/fields/fp3.hpp>
-//#include <nil/algebra/fields/fp4.hpp>
-//#include <nil/algebra/fields/fp6_2over3.hpp>
-//#include <nil/algebra/fields/fp6_3over2.hpp>
-//#include <nil/algebra/fields/fp12_2over3over2.hpp>
-//#include <nil/algebra/fields/modp_ietf.hpp>
-//#include <nil/algebra/fields/modp_srp.hpp>
+#include <nil/algebra/curves/alt_bn128.hpp>
+#include <nil/algebra/curves/bls12.hpp>
+#include <nil/algebra/curves/bn128.hpp>
+// #include <nil/algebra/curves/brainpool_r1.hpp>
+#include <nil/algebra/curves/edwards.hpp>
+// #include <nil/algebra/curves/frp_v1.hpp>
+// #include <nil/algebra/curves/gost_A.hpp>
+#include <nil/algebra/curves/mnt4.hpp>
+#include <nil/algebra/curves/mnt6.hpp>
+// #include <nil/algebra/curves/p192.hpp>
+// #include <nil/algebra/curves/p224.hpp>
+// #include <nil/algebra/curves/p256.hpp>
+// #include <nil/algebra/curves/p384.hpp>
+// #include <nil/algebra/curves/p521.hpp>
+// #include <nil/algebra/curves/secp.hpp>
+// #include <nil/algebra/curves/sm2p_v1.hpp>
+// #include <nil/algebra/curves/x962_p.hpp>
 
 using namespace nil::algebra;
 
+template<typename FpCurveGroup>
+void print_fp_curve_group_element(std::ostream &os, const FpCurveGroup &e) {
+    os << "( " << e.p[0].data << " : " << e.p[1].data << " : " << e.p[2].data << " )";
+}
+
+template<typename Fp2CurveGroup>
+void print_fp2_curve_group_element(std::ostream &os, const Fp2CurveGroup &e) {
+    os << "(" << e.p[0].data[0].data << " , " << e.p[0].data[1].data << ") : (" << e.p[1].data[0].data << " , "
+       << e.p[1].data[1].data << ") : (" << e.p[2].data[0].data << " , " << e.p[2].data[1].data << ")" << std::endl;
+}
+
+template<typename Fp3CurveGroup>
+void print_fp3_curve_group_element(std::ostream &os, const Fp3CurveGroup &e) {
+    os << "(" << e.p[0].data[0].data << " , " << e.p[0].data[1].data << " , " << e.p[0].data[2].data << ") : ("
+       << e.p[1].data[0].data << " , " << e.p[1].data[1].data << " , " << e.p[1].data[2].data << ") : ("
+       << e.p[2].data[0].data << " , " << e.p[2].data[1].data << " , " << e.p[2].data[2].data << ")" << std::endl;
+}
+
+namespace boost {
+    namespace test_tools {
+        namespace tt_detail {
+            template<>
+            struct print_log_value<typename curves::bn128<254>::g1_type> {
+                void operator()(std::ostream &os, typename curves::bn128<254>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::edwards<183>::g1_type> {
+                void operator()(std::ostream &os, typename curves::edwards<183>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::mnt4<298>::g1_type> {
+                void operator()(std::ostream &os, typename curves::mnt4<298>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::mnt6<298>::g1_type> {
+                void operator()(std::ostream &os, typename curves::mnt6<298>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::alt_bn128<254>::g1_type> {
+                void operator()(std::ostream &os, typename curves::alt_bn128<254>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::bls12<381>::g1_type> {
+                void operator()(std::ostream &os, typename curves::bls12<381>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::bls12<377>::g1_type> {
+                void operator()(std::ostream &os, typename curves::bls12<377>::g1_type const &e) {
+                    print_fp_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::mnt4<298>::g2_type> {
+                void operator()(std::ostream &os, typename curves::mnt4<298>::g2_type const &e) {
+                    print_fp2_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::bn128<254>::g2_type> {
+                void operator()(std::ostream &os, typename curves::bn128<254>::g2_type const &e) {
+                    print_fp2_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::bls12<381>::g2_type> {
+                void operator()(std::ostream &os, typename curves::bls12<381>::g2_type const &e) {
+                    print_fp2_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::bls12<377>::g2_type> {
+                void operator()(std::ostream &os, typename curves::bls12<377>::g2_type const &e) {
+                    print_fp2_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::alt_bn128<254>::g2_type> {
+                void operator()(std::ostream &os, typename curves::alt_bn128<254>::g2_type const &e) {
+                    print_fp2_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::edwards<183>::g2_type> {
+                void operator()(std::ostream &os, typename curves::edwards<183>::g2_type const &e) {
+                    print_fp3_curve_group_element(os, e);
+                }
+            };
+
+            template<>
+            struct print_log_value<typename curves::mnt6<298>::g2_type> {
+                void operator()(std::ostream &os, typename curves::mnt6<298>::g2_type const &e) {
+                    print_fp3_curve_group_element(os, e);
+                }
+            };
+
+            template<template<typename, typename> class P, typename K, typename V>
+            struct print_log_value<P<K, V>> {
+                void operator()(std::ostream &, P<K, V> const &) {
+                }
+            };
+
+        }    // namespace tt_detail
+    }        // namespace test_tools
+}    // namespace boost
+
+// if target == check-algebra just data/curves.json
+const char *test_data = "libs/algebra/test/data/curves.json";
+
+boost::property_tree::ptree string_data(std::string test_name) {
+    boost::property_tree::ptree string_data;
+    boost::property_tree::read_json(test_data, string_data);
+
+    return string_data.get_child(test_name);
+}
+
+enum curve_operation_test_constants : std::size_t { C1, C2 };
+
+enum curve_operation_test_points : std::size_t {
+    p1,
+    p2,
+    p1_plus_p2,
+    p1_minus_p2,
+    p1_mul_C1,
+    p2_mul_C1_plus_p2_mul_C2,
+    p1_dbl,
+    p1_mixed_add_p2,
+    p1_to_affine_coordinates,
+    p2_to_special
+};
+
+template<typename CurveGroup>
+void check_curve_operations(const std::vector<CurveGroup> &points, const std::vector<std::size_t> &constants) {
+    BOOST_CHECK_EQUAL(points[p1] + points[p2], points[p1_plus_p2]);
+    BOOST_CHECK_EQUAL(points[p1] - points[p2], points[p1_minus_p2]);
+    BOOST_CHECK_EQUAL(points[p1].doubled(), points[p1_dbl]);
+    BOOST_CHECK_EQUAL(points[p1].mixed_add(points[p2]), points[p1_mixed_add_p2]);
+    CurveGroup p1_copy(points[p1]);
+    p1_copy.to_affine_coordinates();
+    BOOST_CHECK_EQUAL(p1_copy, points[p1_to_affine_coordinates]);
+    CurveGroup p2_copy(points[p2]);
+    p2_copy.to_special();
+    BOOST_CHECK_EQUAL(p2_copy, points[p2_to_special]);
+}
+
+template<typename FpCurveGroup, typename TestSet>
+void fp_curve_test_init(std::vector<FpCurveGroup> &points,
+                        std::vector<std::size_t> &constants,
+                        const TestSet &test_set) {
+    using field_value_type = typename FpCurveGroup::underlying_field_type_value;
+    std::array<field_value_type, 3> coordinates;
+
+    for (auto &point : test_set.second.get_child("point_coordinates")) {
+        auto i = 0;
+        for (auto &coordinate : point.second) {
+            coordinates[i++] = field_value_type(typename field_value_type::modulus_type(coordinate.second.data()));
+        }
+        points.emplace_back(FpCurveGroup(coordinates[0], coordinates[1], coordinates[2]));
+    }
+
+    for (auto &constant : test_set.second.get_child("constants")) {
+        constants.emplace_back(std::stoul(constant.second.data()));
+    }
+}
+
+template<typename Fp2CurveGroup, typename TestSet>
+void fp2_curve_test_init(std::vector<Fp2CurveGroup> &points,
+                         std::vector<std::size_t> &constants,
+                         const TestSet &test_set) {
+    using fp2_value_type = typename Fp2CurveGroup::underlying_field_type_value;
+    using modulus_type = typename fp2_value_type::underlying_type::modulus_type;
+    std::array<modulus_type, 6> coordinates;
+
+    for (auto &point : test_set.second.get_child("point_coordinates")) {
+        auto i = 0;
+        for (auto &coordinate_pairs : point.second) {
+            for (auto &coordinate : coordinate_pairs.second) {
+                coordinates[i++] = modulus_type(coordinate.second.data());
+            }
+        }
+        points.emplace_back(Fp2CurveGroup(fp2_value_type(coordinates[0], coordinates[1]),
+                                          fp2_value_type(coordinates[2], coordinates[3]),
+                                          fp2_value_type(coordinates[4], coordinates[5])));
+    }
+
+    for (auto &constant : test_set.second.get_child("constants")) {
+        constants.emplace_back(std::stoul(constant.second.data()));
+    }
+}
+
+template<typename Fp3CurveGroup, typename TestSet>
+void fp3_curve_test_init(std::vector<Fp3CurveGroup> &points,
+                         std::vector<std::size_t> &constants,
+                         const TestSet &test_set) {
+    using fp3_value_type = typename Fp3CurveGroup::underlying_field_type_value;
+    using modulus_type = typename fp3_value_type::underlying_type::modulus_type;
+
+    std::array<modulus_type, 9> coordinates;
+
+    for (auto &point : test_set.second.get_child("point_coordinates")) {
+        auto i = 0;
+        for (auto &coordinate_pairs : point.second) {
+            for (auto &coordinate : coordinate_pairs.second) {
+                coordinates[i++] = modulus_type(coordinate.second.data());
+            }
+        }
+        points.emplace_back(Fp3CurveGroup(fp3_value_type(coordinates[0], coordinates[1], coordinates[2]),
+                                          fp3_value_type(coordinates[3], coordinates[4], coordinates[5]),
+                                          fp3_value_type(coordinates[6], coordinates[7], coordinates[8])));
+    }
+
+    for (auto &constant : test_set.second.get_child("constants")) {
+        constants.emplace_back(std::stoul(constant.second.data()));
+    }
+}
+
+template<typename CurveGroup, typename TestSet>
+void curve_operation_test(const TestSet &test_set,
+                          void (&test_init)(std::vector<CurveGroup> &, std::vector<std::size_t> &, const TestSet &)) {
+    std::vector<CurveGroup> points;
+    std::vector<std::size_t> constants;
+
+    test_init(points, constants, test_set);
+
+    check_curve_operations(points, constants);
+}
+
 BOOST_AUTO_TEST_SUITE(curves_manual_tests)
 
-BOOST_AUTO_TEST_CASE(curves_manual_test1) {
-    
-    using value_type = fields::dsa_botan<2048, 2048>::value_type;
+BOOST_DATA_TEST_CASE(curve_operation_test_bn128_g1, string_data("curve_operation_test_bn128_g1"), data_set) {
+    using policy_type = curves::bn128<254>::g1_type;
 
-    const fields::dsa_botan<2048, 2048>::modulus_type m = fields::dsa_botan<2048, 2048>::modulus;
-
-    value_type e1 = value_type::one(), e2(3);
-
-    std::cout << e1.is_one() << e2.is_one() << e2.is_zero() << std::endl;
-
-    value_type e3 = e1.dbl() * e2.square();
-
-    value_type e4 = e1 * e2 * e2 + e1 * e2 * e2;
-
-    std::cout << "4 == e1 + e2 ? : " << (value_type(4) == e1 + e2) << std::endl;
-
-    std::cout << "4 == e3 ? : " << (value_type(4) == e3) << std::endl;
-
-    std::cout << "E2 value: " << e2.data << std::endl;
-
-    std::cout << "Modulus value: " << m << std::endl;
-
-    std::cout << (e4 == e3);
-
-    //assert(e4 == e3);
-    BOOST_CHECK_EQUAL(e4.data, e3.data);
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
 }
+
+BOOST_DATA_TEST_CASE(curve_operation_test_edwards_g1, string_data("curve_operation_test_edwards_g1"), data_set) {
+    using policy_type = curves::edwards<183>::g1_type;
+
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_mnt4_g1, string_data("curve_operation_test_mnt4_g1"), data_set) {
+    using policy_type = curves::mnt4<298>::g1_type;
+
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_mnt6_g1, string_data("curve_operation_test_mnt6_g1"), data_set) {
+    using policy_type = curves::mnt6<298>::g1_type;
+
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_mnt4_g2, string_data("curve_operation_test_mnt4_g2"), data_set) {
+    using policy_type = curves::mnt4<298>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp2_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_bn128_g2, string_data("curve_operation_test_bn128_g2"), data_set) {
+    using policy_type = curves::bn128<254>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp2_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_edwards_g2, string_data("curve_operation_test_edwards_g2"), data_set) {
+    using policy_type = curves::edwards<183>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp3_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_mnt6_g2, string_data("curve_operation_test_mnt6_g2"), data_set) {
+    using policy_type = curves::mnt6<298>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp3_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_bls12_381_g1, string_data("curve_operation_test_bls12_381_g1"), data_set) {
+    using policy_type = curves::bls12<381>::g1_type;
+
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_bls12_377_g1, string_data("curve_operation_test_bls12_377_g1"), data_set) {
+    using policy_type = curves::bls12<377>::g1_type;
+
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_bls12_381_g2, string_data("curve_operation_test_bls12_381_g2"), data_set) {
+    using policy_type = curves::bls12<381>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp2_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_bls12_377_g2, string_data("curve_operation_test_bls12_377_g2"), data_set) {
+    using policy_type = curves::bls12<377>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp2_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_alt_bn128_g1, string_data("curve_operation_test_alt_bn128_g1"), data_set) {
+    using policy_type = curves::alt_bn128<254>::g1_type;
+
+    curve_operation_test<policy_type>(data_set, fp_curve_test_init);
+}
+
+BOOST_DATA_TEST_CASE(curve_operation_test_alt_bn128_g2, string_data("curve_operation_test_alt_bn128_g2"), data_set) {
+    using policy_type = curves::alt_bn128<254>::g2_type;
+
+    curve_operation_test<policy_type>(data_set, fp2_curve_test_init);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
-/*
-BOOST_AUTO_TEST_SUITE(fields_dsa_botan_tests)
-BOOST_AUTO_TEST_CASE(fields_dsa_botan_test1) {
-    
-    using value_type = fields::dsa_botan<2048, 2048>::value_type;
-
-    const fields::dsa_botan<2048, 2048>::modulus_type m = fields::dsa_botan<2048, 2048>::modulus;
-
-    value_type e1 = value_type::one(), e2(3);
-
-    std::cout << e1.is_one() << e2.is_one() << e2.is_zero() << std::endl;
-
-    value_type e3 = e1.dbl() * e2.square();
-
-    value_type e4 = e1 * e2 * e2 + e1 * e2 * e2;
-
-    std::cout << "4 == e1 + e2 ? : " << (value_type(4) == e1 + e2) << std::endl;
-
-    std::cout << "4 == e3 ? : " << (value_type(4) == e3) << std::endl;
-
-    std::cout << "E2 value: " << e2.data << std::endl;
-
-    std::cout << "Modulus value: " << m << std::endl;
-
-    std::cout << (e4 == e3);
-
-    //assert(value_type(4) == e3);
-    BOOST_CHECK_EQUAL(value_type(4).data, e3.data);
-}
-BOOST_AUTO_TEST_SUITE_END()*/
-
-
-/*
-template<typename FieldType, typename NumberType>
-void test_field() {
-    NumberType rand1  = NumberType ("76749407");
-    NumberType rand2 = NumberType ("44410867");
-    NumberType randsum = NumberType ("121160274");
-
-    FieldType zero = FieldType::zero();
-    FieldType one = FieldType::one();
-    FieldType a = FieldType::random_element();
-    FieldType a_ser;
-    a_ser = reserialize<FieldType>(a);
-    assert(a_ser == a);
-
-    FieldType b = FieldType::random_element();
-    FieldType c = FieldType::random_element();
-    FieldType d = FieldType::random_element();
-
-    assert(a != zero);
-    assert(a != one);
-
-    assert(a * a == a.squared());
-    assert((a + b).squared() == a.squared() + a * b + b * a + b.squared());
-    assert((a + b) * (c + d) == a * c + a * d + b * c + b * d);
-    assert(a - b == a + (-b));
-    assert(a - b == (-b) + a);
-
-    assert((a ^ rand1) * (a ^ rand2) == (a ^ randsum));
-
-    assert(a * a.inverse() == one);
-    assert((a + b) * c.inverse() == a * c.inverse() + (b.inverse() * c).inverse());
-}
-
-template<typename FieldType>
-void test_sqrt() {
-    for (std::size_t i = 0; i < 100; ++i) {
-        FieldType a = FieldType::random_element();
-        FieldType asq = a.squared();
-        assert(asq.sqrt() == a || asq.sqrt() == -a);
-    }
-}
-
-template<typename FieldType>
-void test_two_squarings() {
-    FieldType a = FieldType::random_element();
-    assert(a.squared() == a * a);
-    assert(a.squared() == a.squared_complex());
-    assert(a.squared() == a.squared_karatsuba());
-}
-
-template<typename FieldType>
-void test_Frobenius() {
-    FieldType a = FieldType::random_element();
-    assert(a.Frobenius_map(0) == a);
-    FieldType a_q = a ^ FieldType::base_field_char();
-    for (std::size_t power = 1; power < 10; ++power) {
-        const FieldType a_qi = a.Frobenius_map(power);
-        assert(a_qi == a_q);
-
-        a_q = a_q ^ FieldType::base_field_char();
-    }
-}
-
-template<typename FieldType>
-void test_unitary_inverse() {
-    assert(FieldType::extension_degree() % 2 == 0);
-    FieldType a = FieldType::random_element();
-    FieldType aqcubed_minus1 = a.Frobenius_map(FieldType::extension_degree() / 2) * a.inverse();
-    assert(aqcubed_minus1.inverse() == aqcubed_minus1.unitary_inverse());
-}
-
-template<typename FieldType>
-void test_cyclotomic_squaring();
-
-template<>
-void test_cyclotomic_squaring<Fqk<edwards_pp>>() {
-    typedef Fqk<edwards_pp> FieldType;
-    assert(FieldType::extension_degree() % 2 == 0);
-    FieldType a = FieldType::random_element();
-    FieldType a_unitary = a.Frobenius_map(FieldType::extension_degree() / 2) * a.inverse();
-    // beta = a^((q^(k/2)-1)*(q+1))
-    FieldType beta = a_unitary.Frobenius_map(1) * a_unitary;
-    assert(beta.cyclotomic_squared() == beta.squared());
-}
-
-template<>
-void test_cyclotomic_squaring<Fqk<mnt4_pp>>() {
-    typedef Fqk<mnt4_pp> FieldType;
-    assert(FieldType::extension_degree() % 2 == 0);
-    FieldType a = FieldType::random_element();
-    FieldType a_unitary = a.Frobenius_map(FieldType::extension_degree() / 2) * a.inverse();
-    // beta = a^(q^(k/2)-1)
-    FieldType beta = a_unitary;
-    assert(beta.cyclotomic_squared() == beta.squared());
-}
-
-template<>
-void test_cyclotomic_squaring<Fqk<mnt6_pp>>() {
-    typedef Fqk<mnt6_pp> FieldType;
-    assert(FieldType::extension_degree() % 2 == 0);
-    FieldType a = FieldType::random_element();
-    FieldType a_unitary = a.Frobenius_map(FieldType::extension_degree() / 2) * a.inverse();
-    // beta = a^((q^(k/2)-1)*(q+1))
-    FieldType beta = a_unitary.Frobenius_map(1) * a_unitary;
-    assert(beta.cyclotomic_squared() == beta.squared());
-}
-
-template<typename CurveType>
-void test_all_fields() {
-    test_field<Fr<CurveType>>();
-    test_field<Fq<CurveType>>();
-    test_field<Fqe<CurveType>>();
-    test_field<Fqk<CurveType>>();
-
-    test_sqrt<Fr<CurveType>>();
-    test_sqrt<Fq<CurveType>>();
-    test_sqrt<Fqe<CurveType>>();
-
-    test_Frobenius<Fqe<CurveType>>();
-    test_Frobenius<Fqk<CurveType>>();
-
-    test_unitary_inverse<Fqk<CurveType>>();
-}
-
-template<typename Fp4T>
-void test_Fp4_tom_cook() {
-    typedef typename Fp4T::my_Fp FieldType;
-    for (size_t i = 0; i < 100; ++i) {
-        const Fp4T a = Fp4T::random_element();
-        const Fp4T b = Fp4T::random_element();
-        const Fp4T correct_res = a * b;
-
-        Fp4T res;
-
-        const FieldType &a0 = a.c0.c0, &a1 = a.c1.c0, &a2 = a.c0.c1, &a3 = a.c1.c1;
-
-        const FieldType &b0 = b.c0.c0, &b1 = b.c1.c0, &b2 = b.c0.c1, &b3 = b.c1.c1;
-
-        FieldType &c0 = res.c0.c0, &c1 = res.c1.c0, &c2 = res.c0.c1, &c3 = res.c1.c1;
-
-        const FieldType v0 = a0 * b0;
-        const FieldType v1 = (a0 + a1 + a2 + a3) * (b0 + b1 + b2 + b3);
-        const FieldType v2 = (a0 - a1 + a2 - a3) * (b0 - b1 + b2 - b3);
-        const FieldType v3 = (a0 + FieldType(2) * a1 + FieldType(4) * a2 + FieldType(8) * a3) *
-                          (b0 + FieldType(2) * b1 + FieldType(4) * b2 + FieldType(8) * b3);
-        const FieldType v4 = (a0 - FieldType(2) * a1 + FieldType(4) * a2 - FieldType(8) * a3) *
-                          (b0 - FieldType(2) * b1 + FieldType(4) * b2 - FieldType(8) * b3);
-        const FieldType v5 = (a0 + FieldType(3) * a1 + FieldType(9) * a2 + FieldType(27) * a3) *
-                          (b0 + FieldType(3) * b1 + FieldType(9) * b2 + FieldType(27) * b3);
-        const FieldType v6 = a3 * b3;
-
-        const FieldType beta = Fp4T::non_residue;
-
-        c0 = v0 + beta * (FieldType(4).inverse() * v0 - FieldType(6).inverse() * (v1 + v2) +
-                          FieldType(24).inverse() * (v3 + v4) - FieldType(5) * v6);
-        c1 = -FieldType(3).inverse() * v0 + v1 - FieldType(2).inverse() * v2 - FieldType(4).inverse() * v3 +
-             FieldType(20).inverse() * v4 + FieldType(30).inverse() * v5 - FieldType(12) * v6 +
-             beta * (-FieldType(12).inverse() * (v0 - v1) + FieldType(24).inverse() * (v2 - v3) -
-                     FieldType(120).inverse() * (v4 - v5) - FieldType(3) * v6);
-        c2 = -(FieldType(5) * (FieldType(4).inverse())) * v0 + (FieldType(2) * (FieldType(3).inverse())) * (v1 + v2) -
-             FieldType(24).inverse() * (v3 + v4) + FieldType(4) * v6 + beta * v6;
-        c3 = FieldType(12).inverse() * (FieldType(5) * v0 - FieldType(7) * v1) -
-             FieldType(24).inverse() * (v2 - FieldType(7) * v3 + v4 + v5) + FieldType(15) * v6;
-
-        assert(res == correct_res);
-
-        // {v0, v3, v4, v5}
-        const FieldType u = (FieldType::one() - beta).inverse();
-        assert(v0 == u * c0 + beta * u * c2 - beta * u * FieldType(2).inverse() * v1 -
-                         beta * u * FieldType(2).inverse() * v2 + beta * v6);
-        assert(v3 == -FieldType(15) * u * c0 - FieldType(30) * u * c1 - FieldType(3) * (FieldType(4) + beta) * u * c2 -
-                         FieldType(6) * (FieldType(4) + beta) * u * c3 +
-                         (FieldType(24) - FieldType(3) * beta * FieldType(2).inverse()) * u * v1 +
-                         (-FieldType(8) + beta * FieldType(2).inverse()) * u * v2 - FieldType(3) * (-FieldType(16) + beta) * v6);
-        assert(v4 == -FieldType(15) * u * c0 + FieldType(30) * u * c1 - FieldType(3) * (FieldType(4) + beta) * u * c2 +
-                         FieldType(6) * (FieldType(4) + beta) * u * c3 +
-                         (FieldType(24) - FieldType(3) * beta * FieldType(2).inverse()) * u * v2 +
-                         (-FieldType(8) + beta * FieldType(2).inverse()) * u * v1 - FieldType(3) * (-FieldType(16) + beta) * v6);
-        assert(v5 == -FieldType(80) * u * c0 - FieldType(240) * u * c1 - FieldType(8) * (FieldType(9) + beta) * u * c2 -
-                         FieldType(24) * (FieldType(9) + beta) * u * c3 - FieldType(2) * (-FieldType(81) + beta) * u * v1 +
-                         (-FieldType(81) + beta) * u * v2 - FieldType(8) * (-FieldType(81) + beta) * v6);
-
-        // c0 + beta c2 - (beta v1)/2 - (beta v2)/ 2 - (-1 + beta) beta v6,
-        // -15 c0 - 30 c1 - 3 (4 + beta) c2 - 6 (4 + beta) c3 + (24 - (3 beta)/2) v1 + (-8 + beta/2) v2 + 3 (-16 + beta)
-        // (-1 + beta) v6, -15 c0 + 30 c1 - 3 (4 + beta) c2 + 6 (4 + beta) c3 + (-8 + beta/2) v1 + (24 - (3 beta)/2) v2
-        // + 3 (-16 + beta) (-1 + beta) v6, -80 c0 - 240 c1 - 8 (9 + beta) c2 - 24 (9 + beta) c3 - 2 (-81 + beta) v1 +
-        // (-81 + beta) v2 + 8 (-81 + beta) (-1 + beta) v6
-    }
-}
-
-int main(void) {
-    edwards_pp::init_public_params();
-    test_all_fields<edwards_pp>();
-    test_cyclotomic_squaring<Fqk<edwards_pp>>();
-
-    mnt4_pp::init_public_params();
-    test_all_fields<mnt4_pp>();
-    test_Fp4_tom_cook<mnt4_Fq4>();
-    test_two_squarings<Fqe<mnt4_pp>>();
-    test_cyclotomic_squaring<Fqk<mnt4_pp>>();
-
-    mnt6_pp::init_public_params();
-    test_all_fields<mnt6_pp>();
-    test_cyclotomic_squaring<Fqk<mnt6_pp>>();
-
-    alt_bn128_pp::init_public_params();
-    test_field<alt_bn128_Fq6>();
-    test_Frobenius<alt_bn128_Fq6>();
-    test_all_fields<alt_bn128_pp>();
-
-    bn128_pp::init_public_params();
-    test_field<Fr<bn128_pp>>();
-    test_field<Fq<bn128_pp>>();
-}
-*/

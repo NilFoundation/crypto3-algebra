@@ -41,10 +41,8 @@ cm_project(algebra WORKSPACE_NAME ${CMAKE_WORKSPACE_NAME} LANGUAGES ASM C CXX)
 cm_find_package(CM)
 include(CMDeploy)
 
-include(CheckSSE)
-include(CheckAVX)
-
 option(BUILD_TESTS "Build unit tests" FALSE)
+option(BUILD_EXAMPLES "Build examples" FALSE)
 
 list(APPEND ${CURRENT_PROJECT_NAME}_PUBLIC_HEADERS)
 
@@ -76,4 +74,8 @@ cm_deploy(TARGETS ${CMAKE_WORKSPACE_NAME}_${CURRENT_PROJECT_NAME} INCLUDE includ
 
 if(BUILD_TESTS)
     add_subdirectory(test)
+endif()
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(example)
 endif()

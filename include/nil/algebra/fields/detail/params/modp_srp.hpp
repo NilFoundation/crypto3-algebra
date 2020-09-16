@@ -14,27 +14,31 @@
 
 #include <nil/algebra/fields/modp_srp.hpp>
 
-#include <nil/algebra/detail/mp_def.hpp>
+#include <nil/algebra/detail/literals.hpp>
 
 namespace nil {
     namespace algebra {
         namespace fields {
             namespace detail {
-            	
+
                 template<std::size_t ModulusBits, std::size_t GeneratorBits = CHAR_BIT>
-                struct arithmetic_params<modp_srp<ModulusBits, GeneratorBits>> : public params<modp_srp<ModulusBits, GeneratorBits>> {
+                struct extension_params<modp_srp<ModulusBits, GeneratorBits>>
+                    : public params<modp_srp<ModulusBits, GeneratorBits>> {
                 private:
                     typedef params<modp_srp<ModulusBits, GeneratorBits>> policy_type;
-                    typedef arithmetic_params<modp_srp<ModulusBits, GeneratorBits>> element_policy_type;
+                    typedef extension_params<modp_srp<ModulusBits, GeneratorBits>> element_policy_type;
+
                 public:
                     typedef typename policy_type::number_type number_type;
+                    typedef typename policy_type::modulus_type modulus_type;
 
-                    constexpr static const modulus_type q = 0;
+                    constexpr static const modulus_type modulus = policy_type::modulus;
+                    constexpr static const modulus_type group_order = 0;
                 };
-            
+
             }    // namespace detail
-        }    // namespace fields
-    }    // namespace algebra
+        }        // namespace fields
+    }            // namespace algebra
 }    // namespace nil
 
 #endif    // ALGEBRA_FIELDS_MODP_SRP_PARAMS_HPP
