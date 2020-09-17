@@ -40,7 +40,6 @@ namespace nil {
                                 typename std::vector<S>::const_iterator scalar_start, 
                                 const size_t n, const T one, operation_set<T, S> op ) {
                 T res = one;
-
                 for (int i = 0; i < n; ++i) {
                     res = op.base_op(res, op.scalar_op(*(scalar_start + i), *(vec_start + i)));
                 }

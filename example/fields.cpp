@@ -30,7 +30,7 @@
 
 #include <nil/algebra/fields/detail/element/fp.hpp>
 #include <nil/algebra/fields/detail/element/fp2.hpp>
-#include <nil/algebra/multiexp/default.hpp>
+#include <nil/algebra/multiexp/fields.hpp>
 
 using namespace nil::algebra;
 
@@ -247,11 +247,6 @@ template<typename FieldType>
 void multiexp_test() {
     using value_type = typename FieldType::value_type;
 
-    std::function<value_type (value_type, value_type)> base_op = [](value_type a, value_type b) -> value_type {return a * b; };
-    std::function<value_type (int, value_type)> s_op = [](int s, value_type a) -> value_type { return a.pow(s); };
-    std::function<value_type (value_type)> dbl_op = [](value_type a) -> value_type { return a * a; };
-    nil::algebra::multiexp::operation_set<value_type, int> op_set(base_op, s_op, dbl_op);
-
     multiexp_test_case<value_type, int> test1(std::vector<value_type>{value_type(500), value_type(352546561), value_type(7)},
                                             std::vector<int>{200, 757, 2}, 2, 3, 2);
     multiexp_test_case<value_type, int> test2(std::vector<value_type>(300, value_type(500)),
@@ -270,11 +265,9 @@ void multiexp_test() {
         typename std::vector<value_type>::const_iterator bases_iter = bases.begin();
         std::vector<int>::const_iterator scalaras_iter = scalars.begin();
 
-        value_type res = nil::algebra::multiexp::eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 31, op_set);
-        value_type naive_res = nil::algebra::multiexp::eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.capacity(), value_type::one(), op_set);
+        value_type res = nil::algebra::fields::eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.size(), 31);
+        value_type naive_res = nil::algebra::fields::eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.size());
 
-        print_field_element(res);
-        print_field_element(naive_res);
         if (res == naive_res) {
             std::cout << "Test " << i << " OK" << std::endl;
         }

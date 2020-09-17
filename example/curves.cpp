@@ -187,8 +187,6 @@ void multi_exp_test()
         value_type res = nil::algebra::curves::eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.size(), 31);
         value_type naive_res = nil::algebra::curves::eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.size());
 
-        print_fp_curve_group_element(res.to_affine_coordinates());
-        print_fp_curve_group_element(naive_res.to_affine_coordinates());
         if (res == naive_res) {
             std::cout << "Test " << i << " OK" << std::endl;
         }
