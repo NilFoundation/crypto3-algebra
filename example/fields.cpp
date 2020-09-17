@@ -234,7 +234,7 @@ template<typename T, typename S> struct multiexp_test_case {
         size_t bucket_size;
         size_t workers_in_group;
 
-        multiexp_test_case(typename std::vector<T> bases, typename std::vector<S> scalars, size_t numb_groups, size_t bucket_size, size_t workers_in_group) {
+        multiexp_test_case(typename std::vector<T> bases, typename std::vector<S> scalars, size_t num_groups, size_t bucket_size, size_t workers_in_group) {
             this->bases = bases;
             this->scalars = scalars;
             this->num_groups = num_groups;
@@ -250,7 +250,7 @@ void multiexp_test() {
     std::function<value_type (value_type, value_type)> base_op = [](value_type a, value_type b) -> value_type {return a * b; };
     std::function<value_type (int, value_type)> s_op = [](int s, value_type a) -> value_type { return a.pow(s); };
     std::function<value_type (value_type)> dbl_op = [](value_type a) -> value_type { return a * a; };
-    operation_set<value_type, int> op_set(base_op, s_op, dbl_op);
+    nil::algebra::multiexp::operation_set<value_type, int> op_set(base_op, s_op, dbl_op);
 
     multiexp_test_case<value_type, int> test1(std::vector<value_type>{value_type(500), value_type(352546561), value_type(7)},
                                             std::vector<int>{200, 757, 2}, 2, 3, 2);
@@ -270,8 +270,8 @@ void multiexp_test() {
         typename std::vector<value_type>::const_iterator bases_iter = bases.begin();
         std::vector<int>::const_iterator scalaras_iter = scalars.begin();
 
-        value_type res = eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 31, op_set);
-        value_type naive_res = eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.capacity(), value_type::one(), op_set);
+        value_type res = nil::algebra::multiexp::eval_multi_exp<value_type, int>(bases_iter, scalaras_iter, tests[i].num_groups, tests[i].bucket_size, tests[i].workers_in_group, bases.capacity(), value_type::one(), 31, op_set);
+        value_type naive_res = nil::algebra::multiexp::eval_multi_exp_naive<value_type, int>(bases_iter, scalaras_iter, bases.capacity(), value_type::one(), op_set);
 
         print_field_element(res);
         print_field_element(naive_res);
@@ -286,7 +286,7 @@ void multiexp_test() {
 
 int main()
 {
-    std::cout << "ALT_BN128-254 Fq basic math:" << std::endl;
+    /*std::cout << "ALT_BN128-254 Fq basic math:" << std::endl;
     fields_fp_basic_math_examples<fields::alt_bn128_fq<254>>();
 
     std::cout << "----------------------------" << std::endl;

@@ -111,6 +111,14 @@ namespace nil {
                     */
                     bn128_g1 operator+(const bn128_g1 &other) const {
 
+                        if (this->is_zero()) {
+                            return other;
+                        }
+
+                        if (other.is_zero()) {
+                            return *this;
+                        }
+
                         bn128_g1 res = *this;
 
                         res += other;
@@ -160,6 +168,7 @@ namespace nil {
                         if (other.p[2].is_zero()) {
                             return *this;
                         }
+
                         underlying_field_type_value Z1Z1, Z2Z2, U1, U2, S1, S2, H, I, J, t3, r, V;
 
                         Z1Z1 = p[2].squared();
@@ -272,7 +281,18 @@ namespace nil {
                     template<typename NumberType>
                     bn128_g1 operator*(const NumberType N) const {
                         // return multi_exp(*this, N);
-                        return *this;
+                        //return *this;
+                        NumberType s = N;
+                        bn128_g1 res = zero();
+                        bn128_g1 acc = *this;
+                        while (s > 0) {
+                            if (s & 1) {
+                                res = res + acc;
+                            }
+                            acc = acc.doubled();
+                            s >>= 1;
+                        }
+                        return res;
                     }
 
                     template<class N>
