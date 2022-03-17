@@ -35,6 +35,10 @@
 #include <nil/crypto3/algebra/curves/detail/forms/short_weierstrass/jacobian_with_a4_0/dbl_2009_l.hpp>
 #include <nil/crypto3/algebra/curves/detail/forms/short_weierstrass/jacobian_with_a4_0/madd_2007_bl.hpp>
 #include <nil/crypto3/algebra/curves/detail/forms/short_weierstrass/element_g1_affine.hpp>
+template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename nil::crypto3::algebra::fields::detail::element_fp<FieldParams> &e);
+template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename nil::crypto3::algebra::fields::detail::element_fp2<FieldParams> &e);
 
 namespace nil {
     namespace crypto3 {
@@ -205,6 +209,12 @@ namespace nil {
                             if (is_zero()) {
                                 return result_type::zero();
                             }
+//                            std::cout << "Z^3 = " << std::endl;
+//                            print_field_element(std::cout, Z * Z.squared());
+//                            std::cout << "Y = " << std::endl;
+//                            print_field_element(std::cout, Y);
+//                            std::cout << "Y/Z^3 = " << std::endl;
+//                            print_field_element(std::cout, Y / (Z * Z.squared()));
 
                             return result_type(X / Z.squared(), Y / (Z * Z.squared()));    //  x=X/Z^2, y=Y/Z^3
                         }

@@ -28,6 +28,8 @@
 
 #include <nil/crypto3/algebra/fields/detail/exponentiation.hpp>
 #include <nil/crypto3/algebra/fields/detail/element/operations.hpp>
+template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename nil::crypto3::algebra::fields::detail::element_fp<FieldParams> &e);
 
 namespace nil {
     namespace crypto3 {
@@ -136,6 +138,20 @@ namespace nil {
                             // error for gcc
                             const underlying_type A0 = data[0], A1 = data[1], B0 = B.data[0], B1 = B.data[1];
                             const underlying_type A0B0 = data[0] * B.data[0], A1B1 = data[1] * B.data[1];
+                            std::cout << "A0B0 = " << std::endl;
+                            print_field_element(std::cout, A0B0);
+                            std::cout << "A1B1 = " << std::endl;
+                            print_field_element(std::cout, A1B1);
+                            std::cout << "-A0B0 = " << std::endl;
+                            print_field_element(std::cout, -A0B0);
+                            std::cout << "-A1B1 = " << std::endl;
+                            print_field_element(std::cout, -A1B1);
+                            std::cout << "(A0 + A1) * (B0 + B1) = " << std::endl;
+                            print_field_element(std::cout, (A0 + A1) * (B0 + B1));
+                            std::cout << "- A0B0 - A1B1 = " << std::endl;
+                            print_field_element(std::cout, - A0B0 - A1B1);
+                            std::cout << "(A0 + A1) * (B0 + B1) - A0B0 - A1B1 = " << std::endl;
+                            print_field_element(std::cout, (A0 + A1) * (B0 + B1) - A0B0 - A1B1);
 
                             return element_fp2(A0B0 + non_residue * A1B1, (A0 + A1) * (B0 + B1) - A0B0 - A1B1);
                         }

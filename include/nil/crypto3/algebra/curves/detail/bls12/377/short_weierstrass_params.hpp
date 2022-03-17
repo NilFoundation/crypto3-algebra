@@ -84,7 +84,7 @@ namespace nil {
                                                             field_type::value_type::underlying_type::one());
                         constexpr static const typename field_type::value_type::underlying_type g1_b =
                             typename field_type::value_type::underlying_type(b);
-                        constexpr static const typename field_type::value_type b = g1_b * twist.inversed();
+//                        constexpr static const typename field_type::value_type b = g1_b * twist.inversed();
 
                         constexpr static const std::array<typename field_type::value_type, 2> zero_fill = {
                             field_type::value_type::zero(), field_type::value_type::one()};
