@@ -67,6 +67,7 @@ namespace nil {
 
                         field_value_type X;
                         field_value_type Y;
+                        bool is_zero_flag;
 
                         /*************************  Constructors and zero/one  ***********************************/
 
@@ -75,7 +76,7 @@ namespace nil {
                          *
                          */
                         constexpr curve_element() :
-                            curve_element(params_type::zero_fill[0], params_type::zero_fill[1]) {};
+                            is_zero_flag(true) {};
 
                         /** @brief
                          *    @return the selected point $(X:Y)$ in the affine coordinates
@@ -84,6 +85,7 @@ namespace nil {
                         constexpr curve_element(field_value_type in_X, field_value_type in_Y) {
                             this->X = in_X;
                             this->Y = in_Y;
+                            is_zero_flag = false;
                         };
 
                         /** @brief Get the point at infinity
@@ -133,7 +135,7 @@ namespace nil {
                          * @return true if element from group G1 is the point at infinity
                          */
                         constexpr bool is_zero() const {
-                            return X == params_type::zero_fill[0] && Y == params_type::zero_fill[1];
+                            return is_zero_flag;
                         }
 
                         /*************************  Reducing operations  ***********************************/

@@ -41,13 +41,27 @@
 //#include <nil/crypto3/algebra/curves/wei25519.hpp>
 #include <nil/crypto3/algebra/curves/secp_k1.hpp>
 #include <nil/crypto3/algebra/curves/pallas.hpp>
+#include <nil/crypto3/algebra/curves/vesta.hpp>
 #include <nil/crypto3/algebra/curves/secp_r1.hpp>
 
 using namespace nil::crypto3::algebra;
 
 template<typename FpCurveGroupElement>
+void print_affine_fp_curve_group_element(FpCurveGroupElement e) {
+    if (e.is_zero()) {
+        std::cout << "zero\n";
+    } else {
+        std::cout << e.X.data << " " << e.Y.data << std::endl;
+    }
+}
+
+template<typename FpCurveGroupElement>
 void print_fp_curve_group_element(FpCurveGroupElement e) {
-    std::cout << e.X.data << " " << e.Y.data << " " << e.Z.data << std::endl;
+    if (e.is_zero()) {
+        std::cout << "zero\n";
+    } else {
+        std::cout << e.X.data << " " << e.Y.data << " " << e.Z.data << std::endl;
+    }
 }
 
 template<typename Fp2CurveGroupElement>
@@ -66,11 +80,44 @@ void print_fp3_curve_group_element(Fp3CurveGroupElement e) {
 // print dunctions can be made using arity in fields
 
 template<typename FpCurveGroup>
+void fp_curve_group_affine_math_examples() {
+    typedef typename FpCurveGroup::value_type group_value_type;
+    typedef typename FpCurveGroup::field_type::value_type field_value_type;
+
+    field_value_type e1 = field_value_type(2), e2(5);
+    group_value_type c1 = group_value_type::zero();
+    group_value_type c2(e1, e2);
+
+    std::cout << "Curve element values: " << std::endl;
+    std::cout << "c1 value: ";
+    print_affine_fp_curve_group_element(c1);
+
+    std::cout << "c2 value: ";
+    print_affine_fp_curve_group_element(c2);
+
+    std::cout << "c1 + c2 value: ";
+    print_affine_fp_curve_group_element(c1 + c2);
+
+    std::cout << "c1 - c2 value: ";
+    print_affine_fp_curve_group_element(c1 - c2);
+
+    std::cout << "Doubled c1 value: ";
+    print_affine_fp_curve_group_element(c1.doubled());
+
+    group_value_type cd = c1.doubled();
+
+    // group_value_type cn = c1.normalize();
+
+    // std::cout << "c1 normalized value: ";
+    // print_fp_curve_group_element(cn);
+}
+
+template<typename FpCurveGroup>
 void fp_curve_group_basic_math_examples() {
     typedef typename FpCurveGroup::value_type group_value_type;
     typedef typename FpCurveGroup::field_type::value_type field_value_type;
 
-    field_value_type e1 = field_value_type(2), e2(3), e3(5), e4(3), e5(5), e6(7);
+    field_value_type e1 = field_value_type(0), e2(1), e3(0), e4(3), e5(5), e6(7);
     group_value_type c1(e1, e2, e3), c2(e4, e5, e6);
 
     std::cout << "Curve element values: " << std::endl;
@@ -243,6 +290,16 @@ int main() {
 
     std::cout << "Pallas curve g1 group basic math:" << std::endl;
     fp_curve_group_basic_math_examples<curves::pallas::g1_type<>>();
+    
+     std::cout << "----------------------------" << std::endl;
+
+    std::cout << "Pallas curve g1 group affine math:" << std::endl;
+    fp_curve_group_affine_math_examples<curves::pallas::g1_type<curves::coordinates::affine>>();
+    
+     std::cout << "----------------------------" << std::endl;
+
+    std::cout << "Vesta curve g1 group affine math:" << std::endl;
+    fp_curve_group_affine_math_examples<curves::vesta::g1_type<curves::coordinates::affine>>();
     
      std::cout << "----------------------------" << std::endl;
 
