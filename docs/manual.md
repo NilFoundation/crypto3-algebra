@@ -80,9 +80,22 @@ constexpr matrix<double, 3, 3> m1 = {1., 2., 3., 4., 5., 6., 7., 8., 9.};
 constexpr matrix m2 = {{{1., 2.}}};
 ```
 
+# Pairings
 
+The library supports creation of bilinear pairing groups. 
 
+## Usage
+Pairings are defined under the namespaces `nil::crypto3::algebra::pairing`
 
+TODO 
+
+# Multi-exponentiation algorithm
+
+TODO
+
+## Usage
+
+TODO
 
 # Examples
 
