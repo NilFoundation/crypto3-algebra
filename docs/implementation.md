@@ -2,14 +2,14 @@
 
 @tableofcontents
 
-The key idea of `algebra` is to provide usefull interfaces for basic cryptography math. It's based on NilFoundation fork of 
+The key idea of `algebra` is to provide useful interfaces for basic cryptography math. It's based on NilFoundation fork of 
 Boost.Multiprecision so that it can be used with boost cpp_int, gmp or other backends.
 
 We expanded Boost.Multiprecision with `modular_adaptor`, which is actually a multi-precision number by some modular. It contains 
 modular number-specific algorithms using Montgomery representation. It also supports compile-time computations, because it gives 
 us opportunity to implement algebra constructions as constexpr.
 
-For our purposes we needed the opportunity to use field and curve arithmetic in compile time, what became possible thanks to 
+For crypto3 we needed to use field and curve arithmetic in compile time, which became possible thanks to 
 compile-time `modular_adaptor`.
 
 Algebra library consists of several modules listed below:
@@ -17,16 +17,13 @@ Algebra library consists of several modules listed below:
 1. Fields arithmetic
 2. Elliptic curves arithmetic
 3. Pairings on elliptic curves
-4. Multiexponentiation algorithm (will be part of some other module after a while)
-5. Matricies and vectors
-
-This separation defines the implementation architecture.
-
+4. Multi-exponentiation algorithm (will be part of some other module after a while)
+5. Matrices and vectors
 
 
 ## Fields Architecture ## {#fields_architecture}
 
-Fields were meant to be a wrapper over `multiprecision` module and concept of `modular_adaptor` number. So it basically consist 
+Fields are a wrapper over `multiprecision` module and concept of `modular_adaptor` number. So it basically consist 
 of several parts listed below:
 
 1. Field Policies
@@ -57,7 +54,7 @@ A field policy describes its essential parameters such as `modulus`, `arity` or 
 
 ### Field Extensions ### {#field_extensions}
 
-For the purposes of effictive field/elliptic curve operations and pairings evaluation fields are arranged as a field tower.
+For the purposes of effective field/elliptic curve operations and pairings evaluation fields are arranged as a field tower.
 
 For example, this is the tower used for `bn128` and `bls12_381` operations and pairings evaluation:
 
@@ -167,7 +164,7 @@ are based on the underlying field algorithms are also defined here.
 
 ### Basic Curve Policies ### {#basic_curve_policies}
 
-Main reason for existence of basic policyis is that we need some of it params using in group element and pairing arithmetic. 
+Main reason for existence of basic policy is is that we need some of it params using in group element and pairing arithmetic. 
 So it contains such parameters that are needed by group element arithmetic e.g. coeffs `a` and `b` or generator coordinates `x`, `y`. 
 It also contains all needed information about the underlying fields. 
 
