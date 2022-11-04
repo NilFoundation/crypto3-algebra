@@ -77,8 +77,7 @@ namespace nil {
             template<typename T>
             struct is_curve {
                 static const bool value = has_type_base_field_type<T>::value && has_type_scalar_field_type<T>::value &&
-                                          has_type_g1_type<T>::value && has_type_g2_type<T>::value &&
-                                          has_type_gt_type<T>::value;
+                                          has_type_g1_type<T>::value;
                 typedef T type;
             };
 
