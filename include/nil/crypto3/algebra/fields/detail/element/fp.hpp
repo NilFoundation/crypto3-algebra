@@ -39,6 +39,10 @@
 
 #include <type_traits>
 
+#ifdef __EVM__
+#include "fp_evm.hpp"
+#else
+
 namespace nil {
     namespace crypto3 {
         namespace algebra {
@@ -240,5 +244,7 @@ namespace nil {
         }            // namespace algebra
     }                // namespace crypto3
 }    // namespace nil
+
+#endif  // __EVM__
 
 #endif    // CRYPTO3_ALGEBRA_FIELDS_ELEMENT_FP_HPP

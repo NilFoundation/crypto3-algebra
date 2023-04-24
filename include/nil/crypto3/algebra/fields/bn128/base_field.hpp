@@ -61,11 +61,15 @@ namespace nil {
 
                     typedef typename policy_type::modular_backend modular_backend;
                     constexpr static const modular_params_type modulus_params = modulus;
+#ifdef __EVM__
+                    typedef nil::crypto3::multiprecision::number<modular_backend> modular_type;
+#else
                     typedef nil::crypto3::multiprecision::number<
                         nil::crypto3::multiprecision::backends::modular_adaptor<
                             modular_backend,
                             nil::crypto3::multiprecision::backends::modular_params_ct<modular_backend, modulus_params>>>
                         modular_type;
+#endif
 
                     typedef typename detail::element_fp<params<bn128_base_field<254>>> value_type;
 
