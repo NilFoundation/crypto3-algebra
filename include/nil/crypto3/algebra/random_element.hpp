@@ -46,6 +46,7 @@
 
 #include <random>
 
+
 namespace nil {
     namespace crypto3 {
         namespace algebra {
@@ -67,8 +68,8 @@ namespace nil {
 
                 // boost::random_device rd;
                 // rd.seed(time(0));
-
-                typename field_type::value_type value(d(rng));
+                auto twister = boost::random::mt11213b(432432);
+                typename field_type::value_type value(d(twister));
 
                 return value;
             }

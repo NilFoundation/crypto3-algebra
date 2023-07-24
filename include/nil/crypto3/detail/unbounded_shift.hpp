@@ -89,6 +89,8 @@ namespace nil {
 
             template<size_t Shift, std::size_t TypeBits, typename T>
             T low_bits(T x) {
+                if (TypeBits <= Shift)
+                    return x;
                 constexpr std::size_t real_shift = TypeBits - Shift;
                 T lowmask = ((bool)Shift) * unbounded_shr<real_shift, T>(~T());
                 return x & lowmask;
@@ -96,7 +98,7 @@ namespace nil {
 
             template<size_t type_bits, typename T>
             T low_bits(T x, std::size_t shift) {
-                if (sizeof(T) * CHAR_BIT <= shift)
+                if (type_bits <= shift)
                     return x;
                 T lowmask = ((bool)shift) * unbounded_shr<T>(~T(), type_bits - shift);
                 return x & lowmask;
@@ -104,7 +106,8 @@ namespace nil {
 
             template<size_t type_bits, typename T>
             T high_bits(T x, std::size_t shift) {
-                if (sizeof(T) * CHAR_BIT <= shift)
+//std::cout << "./algebra/include/nil/crypto3/detail/unbounded_shift.hpp x = " << x << "shift = " << shift << " type_bits =" << type_bits << "\n";
+                if (type_bits <= shift)
                     return x;
                 T highmask = ((bool)shift) * unbounded_shl<T>(~T(), type_bits - shift);
                 return x & highmask;
