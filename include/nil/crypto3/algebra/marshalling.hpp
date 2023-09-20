@@ -130,6 +130,23 @@ namespace nil {
 
                     return field_octets_num;
                 }
+
+                template<typename TargetFieldType, size_t ChunkSizeBits>
+                std::array<typename TargetFieldType::value_type, (field_type::value_bits + ChunkSizeBits - 1) / ChunkSizeBits>
+                static inline split_field_element(const field_value_type& element) {
+                    constexpr size_t num_chunks = (field_type::value_bits + ChunkSizeBits - 1) / ChunkSizeBits;
+
+                    typename field_type::integral_type input_integral = typename field_type::integral_type(element.data);
+                    std::array<typename TargetFieldType::value_type, num_chunks> output;
+
+                    typename field_type::integral_type mask = (typename field_type::integral_type(1) << ChunkSizeBits) - 1;
+
+                    for (size_t i = 0; i < num_chunks; ++i) {
+                        output[i] = (input_integral >> (ChunkSizeBits * i)) & mask;
+                    }
+
+                    return output;
+                }
             };
 
             template<typename CurveType>
