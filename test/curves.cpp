@@ -56,6 +56,8 @@
 
 #include <nil/crypto3/algebra/random_element.hpp>
 
+#include <nil/crypto3/algebra/detail/weierstrass.hpp>
+
 #include <nil/crypto3/multiprecision/cpp_int.hpp>
 
 using namespace nil::crypto3::algebra;
