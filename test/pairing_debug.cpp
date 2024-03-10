@@ -737,6 +737,46 @@ void check_pairing_operations() {
     std::cerr << "}";
 }
 
+template<typename CurveType>
+void check_curve() {
+    using curve_type = CurveType;
+    using scalar_field_type = typename curve_type::scalar_field_type;
+    using g1_type = typename curve_type::template g1_type<>;
+    using g2_type = typename curve_type::template g2_type<>;
+    using gt_type = typename curve_type::gt_type;
+    using g1_field_value_type = typename g1_type::field_type::value_type;
+    using g2_field_value_type = typename g2_type::field_type::value_type;
+
+    typename scalar_field_type::value_type
+        c1,c2;
+ 
+    typename g1_type::value_type G1, A1, A2;
+    typename g1_type::value_type p1 = {
+        0x22c26a3c19d56fc8790485554be5dc4351961a5162c3634965dc8ae56701157e_cppui254,
+        0x1e3305b98bf381650491b7b63559d20d662b70f1616e680a19170715b59a3426_cppui254,
+        0x2dadec13affe7e4ad00a4c896773b96ce87fbcb232b8660721adc1f266defa45_cppui254,
+    };
+    typename g1_type::value_type p2 = {
+        0x148a1f438a4cd0d807549cb7f9ec9f41dba3d8b14a6b0f2489d9b9f626d6fd31_cppui254,
+        0x3cc907ef65b0eff91d027e4771e9116a0b125325627b6bdf55037702220b1b2_cppui254,
+        0x1242df09f53bda3a3bfb5fb2054817c6cbb32a7217556a6c831113f4d3fee54c_cppui254,
+    };
+    G1 = g1_type::value_type::one();
+    // G2 = g2_type::value_type::one();
+
+    c1 = 345751109;
+    c2 = 270382749;
+
+    A1 = G1*c1;
+    A2 = G1*c2;
+
+    print_curve_group_element(std::cout, p1); std::cout << std::endl;
+    print_curve_group_element(std::cout, p2); std::cout << std::endl;
+
+    print_curve_group_element_affine(std::cout, p1.to_affine()); std::cout << std::endl;
+    print_curve_group_element_affine(std::cout, p2.to_affine()); std::cout << std::endl;
+
+}
 
 BOOST_AUTO_TEST_SUITE(pairing_debug_tests)
 BOOST_AUTO_TEST_CASE(pairing_operation_test_atl_bn128_254) {
@@ -745,7 +785,9 @@ BOOST_AUTO_TEST_CASE(pairing_operation_test_atl_bn128_254) {
     //using curve_type = typename curves::mnt6<298>;
     //using curve_type = typename curves::bls12<381>;
 
-    check_pairing_operations<curve_type>();
+    check_curve<curve_type>();
+    
+   // check_pairing_operations<curve_type>();
 }
 
 /*

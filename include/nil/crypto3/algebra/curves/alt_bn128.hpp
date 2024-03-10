@@ -28,6 +28,7 @@
 #define CRYPTO3_ALGEBRA_CURVES_ALT_BN128_HPP
 
 #include <nil/crypto3/algebra/curves/detail/alt_bn128/types.hpp>
+
 #include <nil/crypto3/algebra/curves/detail/alt_bn128/g1.hpp>
 #include <nil/crypto3/algebra/curves/detail/alt_bn128/g2.hpp>
 
