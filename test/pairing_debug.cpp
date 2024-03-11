@@ -221,13 +221,13 @@ void print_g1_precomp_element(std::ostream &os, const typename pairing::pairing_
 
 void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_policy<curves::alt_bn128<254>>::g2_precomputed_type &e) {
     os << "\"coordinates\": [[" << e.QX.data[0].data << " , " << e.QX.data[1].data << "] , [" << e.QY.data[0].data
-       << " , " << e.QY.data[1].data << "]]" << std::endl;
+       << " , " << e.QY.data[1].data << "]]," << std::endl;
     auto print_coeff = [&os](const auto &c) {
         os << "\"ell_0\": [" << c.ell_0.data[0].data << "," << c.ell_0.data[1].data << "],"
            << "\"ell_VW\": [" << c.ell_VW.data[0].data << "," << c.ell_VW.data[1].data << "],"
            << "\"ell_VV\": [" << c.ell_VV.data[0].data << "," << c.ell_VV.data[1].data << "]";
     };
-    os << "coefficients: [" << std::endl;
+    os << "\"coefficients\": [" << std::endl;
     for (auto &c : e.coeffs) {
         os << "{" << std::endl;
         print_coeff(c);
@@ -238,14 +238,20 @@ void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_
 
 
 void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_policy<curves::bls12<381>>::g2_precomputed_type &e) {
-    os << "\"coordinates\": [[" << e.QX.data[0].data << " , " << e.QX.data[1].data << "] , [" << e.QY.data[0].data
-       << " , " << e.QY.data[1].data << "]]" << std::endl;
+
+    os << "\"coordinates\": [["
+        << e.QX.data[0].data << " , "
+        << e.QX.data[1].data << "] , ["
+        << e.QY.data[0].data << " , "
+        << e.QY.data[1].data << "]], " << std::endl;
+
     auto print_coeff = [&os](const auto &c) {
         os << "\"ell_0\": [" << c.ell_0.data[0].data << "," << c.ell_0.data[1].data << "],"
            << "\"ell_VW\": [" << c.ell_VW.data[0].data << "," << c.ell_VW.data[1].data << "],"
            << "\"ell_VV\": [" << c.ell_VV.data[0].data << "," << c.ell_VV.data[1].data << "]";
     };
-    os << "coefficients: [";
+
+    os << "\"coefficients\": [";
     for (auto &c : e.coeffs) {
         os << "{";
         print_coeff(c);
@@ -533,6 +539,9 @@ namespace boost {
 // TODO: add affine_pair_reduceding test
 template<typename CurveType>
 void check_pairing_operations() {
+
+    std::ofstream json("output.json");
+
     using curve_type = CurveType;
     using scalar_field_type = typename curve_type::scalar_field_type;
     using g1_type = typename curve_type::template g1_type<>;
@@ -633,32 +642,32 @@ void check_pairing_operations() {
     auto prec_B2 = precompute_g2<curve_type>(B2);
      //std::cerr << "------------" << std::endl;
 
-    std::cerr << "{";
-    std::cerr << "\"Fr\": [" ;
-    print_field_element(std::cerr, VKx_poly); std::cerr << ",";
-    print_field_element(std::cerr, VKy_poly); std::cerr << ",";
-    print_field_element(std::cerr, VKz_poly); std::cerr << ",";
-    print_field_element(std::cerr, A1_poly ); std::cerr << ",";
-    print_field_element(std::cerr, B1_poly ); std::cerr << ",";
-    print_field_element(std::cerr, C1_poly ); std::cerr << ",";
-    print_field_element(std::cerr, A2_poly ); std::cerr << ",";
-    print_field_element(std::cerr, B2_poly ); std::cerr << ",";
-    print_field_element(std::cerr, C2_poly ); std::cerr << "]," << std::endl;
+    json << "{";
+    json << "\"Fr\": [" ;
+    print_field_element(json, VKx_poly); json << ",";
+    print_field_element(json, VKy_poly); json << ",";
+    print_field_element(json, VKz_poly); json << ",";
+    print_field_element(json, A1_poly ); json << ",";
+    print_field_element(json, B1_poly ); json << ",";
+    print_field_element(json, C1_poly ); json << ",";
+    print_field_element(json, A2_poly ); json << ",";
+    print_field_element(json, B2_poly ); json << ",";
+    print_field_element(json, C2_poly ); json << "]," << std::endl;
 
-    std::cerr << "\"G1\": [" ;
-    print_curve_group_element(std::cerr, A1); std::cerr << ",";
-    print_curve_group_element(std::cerr, C1); std::cerr << ",";
-    print_curve_group_element(std::cerr, A2); std::cerr << ",";
-    print_curve_group_element(std::cerr, C2); std::cerr << ",";
-    print_curve_group_element(std::cerr, VKx);
-    std::cerr << "],";
+    json << "\"G1\": [" ;
+    print_curve_group_element(json, A1); json << ",";
+    print_curve_group_element(json, C1); json << ",";
+    print_curve_group_element(json, A2); json << ",";
+    print_curve_group_element(json, C2); json << ",";
+    print_curve_group_element(json, VKx);
+    json << "],";
 
-    std::cerr << "\"G2\": [" ;
-    print_curve_group_element(std::cerr, B1); std::cerr << ",";
-    print_curve_group_element(std::cerr, B2); std::cerr << ",";
-    print_curve_group_element(std::cerr, VKy); std::cerr << ",";
-    print_curve_group_element(std::cerr, VKz);
-    std::cerr << "],";
+    json << "\"G2\": [" ;
+    print_curve_group_element(json, B1); json << ",";
+    print_curve_group_element(json, B2); json << ",";
+    print_curve_group_element(json, VKy); json << ",";
+    print_curve_group_element(json, VKz);
+    json << "],";
 
     typename gt_type::value_type A1_B1 = pair<curve_type>(A1, B1);
     typename gt_type::value_type A2_B2 = pair<curve_type>(A2, B2);
@@ -712,29 +721,29 @@ void check_pairing_operations() {
     /* consistency check */
     BOOST_CHECK(miller_A1_B1 * miller_A2_B2 == double_miller_A1_B1_A2_B2);
 
-    std::cerr << "\"GT\": [" ;
-    print_field_element(std::cerr, A1_B1); std::cerr << ",";
-    print_field_element(std::cerr, A2_B2); std::cerr << ",";
-    print_field_element(std::cerr, A1_B1_reduced); std::cerr << ",";
-    print_field_element(std::cerr, A2_B2_reduced); std::cerr << ",";
-    print_field_element(std::cerr, A1_B1_x_A2_B2); std::cerr << ",";
-    print_field_element(std::cerr, VKx_A1_B1); std::cerr << ",";
-    print_field_element(std::cerr, miller_A1_B1); std::cerr << ",";
-    print_field_element(std::cerr, miller_A2_B2); std::cerr << ",";
-    print_field_element(std::cerr, double_miller_A1_B1_A2_B2); std::cerr << "";
-    std::cerr << "]," << std::endl;
+    json << "\"GT\": [" ;
+    print_field_element(json, A1_B1); json << ",";
+    print_field_element(json, A2_B2); json << ",";
+    print_field_element(json, A1_B1_reduced); json << ",";
+    print_field_element(json, A2_B2_reduced); json << ",";
+    print_field_element(json, A1_B1_x_A2_B2); json << ",";
+    print_field_element(json, VKx_A1_B1); json << ",";
+    print_field_element(json, miller_A1_B1); json << ",";
+    print_field_element(json, miller_A2_B2); json << ",";
+    print_field_element(json, double_miller_A1_B1_A2_B2); json << "";
+    json << "]," << std::endl;
 
-    std::cerr << "\"g1_precomputed_type\": [";
-    print_g1_precomp_element(std::cerr, prec_A1); std::cerr << ",";
-    print_g1_precomp_element(std::cerr, prec_A2);
-    std::cerr << "]," << std::endl;
+    json << "\"g1_precomputed_type\": [";
+    print_g1_precomp_element(json, prec_A1); json << ",";
+    print_g1_precomp_element(json, prec_A2);
+    json << "]," << std::endl;
 
-    std::cerr << "\"g2_precomputed_type\": [";
-    print_g2_precomp_element(std::cerr, prec_B1); std::cerr << ",";
-    print_g2_precomp_element(std::cerr, prec_B2);
-    std::cerr << "]" << std::endl;
+    json << "\"g2_precomputed_type\": [";
+    print_g2_precomp_element(json, prec_B1); json << ",";
+    print_g2_precomp_element(json, prec_B2);
+    json << "]" << std::endl;
 
-    std::cerr << "}";
+    json << "}";
 }
 
 template<typename CurveType>
@@ -785,9 +794,9 @@ BOOST_AUTO_TEST_CASE(pairing_operation_test_atl_bn128_254) {
     //using curve_type = typename curves::mnt6<298>;
     //using curve_type = typename curves::bls12<381>;
 
-    check_curve<curve_type>();
+    // check_curve<curve_type>();
     
-   // check_pairing_operations<curve_type>();
+    check_pairing_operations<curve_type>();
 }
 
 /*
