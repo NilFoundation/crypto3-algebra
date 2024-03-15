@@ -85,6 +85,7 @@ set(RUNTIME_TESTS_NAMES
     "fields"
     "fields_static"
     "pairing"
+    "pairing_debug"
     "hash_to_curve"
     "multiexp"
     )

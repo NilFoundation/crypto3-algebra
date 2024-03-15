@@ -270,6 +270,11 @@ namespace nil {
                             return underlying_type(non_residue * A.data[2], A.data[0], A.data[1]);
                         }
 
+                        /** @brief Multiply by other, assuming form:
+                         * [ [0,0,a], [b,c,d] ]
+                         * other[0] == 0
+                         * other[1] == 0
+                         */
                         element_fp6_2over3 mul_by_2345(const element_fp6_2over3 &other) const {
                             /* Devegili OhEig Scott Dahab --- Multiplication and Squaring on Pairing-Friendly
                              * Fields.pdf; Section 3 (Karatsuba) */
