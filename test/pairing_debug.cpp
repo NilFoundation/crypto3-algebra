@@ -893,11 +893,11 @@ void check_curve() {
 
 BOOST_AUTO_TEST_SUITE(pairing_debug_tests)
 BOOST_AUTO_TEST_CASE(pairing_operation_test_atl_bn128_254) {
-//    using curve_type = typename curves::alt_bn128_254;
+    using curve_type = typename curves::alt_bn128_254;
     //using curve_type = typename curves::mnt4<298>;
     //using curve_type = typename curves::mnt6<298>;
     //using curve_type = typename curves::bls12<381>;
-    using curve_type = typename curves::bls12<377>;
+//    using curve_type = typename curves::bls12<377>;
 
     // check_curve<curve_type>();
     

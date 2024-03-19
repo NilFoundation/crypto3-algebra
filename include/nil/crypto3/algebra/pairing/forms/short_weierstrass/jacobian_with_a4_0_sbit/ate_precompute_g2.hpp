@@ -54,27 +54,6 @@ namespace nil {
 
                     using g2_field_type_value = typename g2_type::field_type::value_type;
 
-                    static void print_g2(typename g2_type::value_type const& v)
-                    {
-                        std::cout << "{";
-                        std::cout << "\"x\": [ \"" << v.X.data[0] << "\", \"" << v.X.data[1] << "\"], ";
-                        std::cout << "\"y\": [ \"" << v.Y.data[0] << "\", \"" << v.Y.data[1] << "\"], ";
-                        std::cout << "\"z\": [ \"" << v.Z.data[0] << "\", \"" << v.Z.data[1] << "\"]";
-                        std::cout << "}";
-                    }
-
-                    static void print_ell(typename policy_type::ate_ell_coeffs const& c)
-                    {
-                        std::cout << "{";
-                        std::cout << "\"ell_0\" : [ \""
-                            << c.ell_0.data[0]  << "\", \"" << c.ell_0.data[1] << "\"], " << std::endl;
-                        std::cout << "\"ell_VW\": [ \""
-                            << c.ell_VW.data[0] << "\", \"" << c.ell_VW.data[1] << "\"], " << std::endl;
-                        std::cout << "\"ell_VV\": [ \""
-                            << c.ell_VV.data[0] << "\", \"" << c.ell_VV.data[1] << "\"]" << std::endl;
-                        std::cout << "}";
-                     }
-
                     /* https://eprint.iacr.org/2013/722.pdf
                      * Equations (11) at p.13
                      * current *= 2, output ell coefficients in c
@@ -84,9 +63,6 @@ namespace nil {
                             typename g2_type::value_type &current,
                             typename policy_type::ate_ell_coeffs &c)
                     {
-
-//                        std::cout << "doubling: "; print_g2(current); std::cout << std::endl;
-
                         const g2_field_type_value X = current.X, Y = current.Y, Z = current.Z;
 
                         const g2_field_type_value A = two_inv * (X * Y);                 // A = X1 * Y1 / 2
@@ -115,9 +91,6 @@ namespace nil {
                             c.ell_VW = J.doubled()+J;
                             c.ell_VV = I;
                         }
-//                        std::cout << "doubling: "; print_g2(current); std::cout << std::endl;
-//                        print_ell(c); std::cout << std::endl;
-
                     }
 
                     /* https://eprint.iacr.org/2013/722.pdf
@@ -129,9 +102,6 @@ namespace nil {
                             typename g2_type::value_type &current,
                             typename policy_type::ate_ell_coeffs &c)
                     {
-
-//                        std::cout << "adding: "; print_g2(current); std::cout << std::endl;
-
                         const g2_field_type_value X1 = current.X, Y1 = current.Y, Z1 = current.Z;
                         const g2_field_type_value &x2 = base.X, &y2 = base.Y;
 
@@ -159,8 +129,6 @@ namespace nil {
                             c.ell_VW = -theta;
                             c.ell_VV = J;
                         }
-//                        std::cout << "adding: "; print_g2(current); std::cout << std::endl;
-//                        print_ell(c); std::cout << std::endl;
                     }
 
                     static typename g2_affine_type::value_type mul_by_char(

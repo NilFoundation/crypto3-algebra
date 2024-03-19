@@ -36,90 +36,6 @@
 namespace nil {
     namespace crypto3 {
         namespace algebra {
-
-
-namespace debug {
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const typename fields::detail::element_fp<FieldParams> &e) {
-//    os << std::hex <<"0x"<< std::setw((FieldParams::modulus_bits+7)/4) << std::setfill('0') << e.data << "_cppui" << std::dec << FieldParams::modulus_bits << " ";
-    os << '"' << e.data << '"' ;
-}
-
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const typename fields::detail::element_fp2<FieldParams> &e) {
-    os << "    [ ";
-    print_field_element(os, e.data[0]);
-    os << ", ";
-    print_field_element(os, e.data[1]);
-    os << "]";
-}
-
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const typename fields::detail::element_fp3<FieldParams> &e) {
-    os << "[";
-    print_field_element(os, e.data[0]);
-    os << ", ";
-    print_field_element(os, e.data[1]);
-    os << ", ";
-    print_field_element(os, e.data[2]);
-    os << "]";
-}
-
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const typename fields::detail::element_fp4<FieldParams> &e) {
-    os << "[";
-    print_field_element(os, e.data[0]);
-    os << ", ";
-    print_field_element(os, e.data[1]);
-    os << "]";
-}
-
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const typename fields::detail::element_fp6_2over3<FieldParams> &e) {
-    os << "[";
-    print_field_element(os, e.data[0]);
-    os << ", ";
-    print_field_element(os, e.data[1]);
-    os << "]";
-}
-
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const typename fields::detail::element_fp6_3over2<FieldParams> &e) {
-    os << "  [" << std::endl;
-    print_field_element(os, e.data[0]);
-    os << ", " << std::endl;
-    print_field_element(os, e.data[1]);
-    os << ", " << std::endl;
-    print_field_element(os, e.data[2]);
-    os << std::endl << "  ]";
-}
-
-
-template<typename FieldParams>
-void print_field_element(std::ostream &os, const fields::detail::element_fp12_2over3over2<FieldParams> &e) {
-    os << "[" << std::endl;
-    print_field_element(os, e.data[0]);
-    os << ", " << std::endl;
-    print_field_element(os, e.data[1]);
-    os << std::endl << "]";
-}
-
-template<typename FieldParams>
-void print_ell_coeffs(std::ostream &os, 
-        fields::detail::element_fp2<FieldParams> const& ell_0,
-        fields::detail::element_fp2<FieldParams> const& ell_VW,
-        fields::detail::element_fp2<FieldParams> const& ell_VV)
-{
-    os << "{" << std::endl;
-    os << "\"ell_0\" : "; print_field_element(os, ell_0 ); os << "," << std::endl;
-    os << "\"ell_VW\": "; print_field_element(os, ell_VW); os << "," << std::endl;
-    os << "\"ell_VV\": "; print_field_element(os, ell_VV); os << "" << std::endl;
-    os << "}" << std::endl;
-}
-
-}
-
-
             namespace pairing {
 
                 template<typename CurveType>
@@ -162,52 +78,31 @@ void print_ell_coeffs(std::ostream &os,
                                 ++idx;
                                 if (params_type::twist_type == twist_type::TWIST_TYPE_M) {
                                     f = f.mul_by_014(c.ell_0, prec_P.PX * c.ell_VW, prec_P.PY * c.ell_VV);
-                                    debug::print_ell_coeffs(std::cout, c.ell_0, prec_P.PX * c.ell_VW, prec_P.PY * c.ell_VV);
                                 } else {
                                     f = f.mul_by_034(prec_P.PY * c.ell_0, prec_P.PX * c.ell_VW, c.ell_VV);
-                                    debug::print_ell_coeffs(std::cout, prec_P.PY * c.ell_0, prec_P.PX * c.ell_VW, c.ell_VV);
                                 }
-                                std::cout << "by bit " << std::setw(2) << (int)(*bit) <<" :";
-                                debug::print_field_element(std::cout, f);
-                                std::cout << std::endl;
                             }
-
-                            std::cout << "-------" << std::endl;
                         }
-
-                        std::cout << "~~~~~~~~~~~~~~FINAL~~~~~~~~~~~~~" << std::endl;
-                        debug::print_field_element(std::cout, f); std::cout << std::endl;
 
                         if (params_type::final_exponent_is_z_neg) {
                             f = f.inversed();
                         }
 
-                        std::cout << "~~~~~~~~~~~~~~INVERSED?~~~~~~~~~~~~~" << std::endl;
-                        debug::print_field_element(std::cout, f); std::cout << std::endl;
-
-
-                        std::cout << "~=~=~=~= Final two coefficeints ~=~=~=~=" << std::endl;
                         c = prec_Q.coeffs[idx];
                         ++idx;
                         if (params_type::twist_type == twist_type::TWIST_TYPE_M) {
                             f = f.mul_by_014(c.ell_0, prec_P.PX * c.ell_VW, prec_P.PY * c.ell_VV);
-                            debug::print_ell_coeffs(std::cout, c.ell_0, prec_P.PX * c.ell_VW, prec_P.PY * c.ell_VV);
                         } else {
                             f = f.mul_by_034(prec_P.PY * c.ell_0, prec_P.PX * c.ell_VW, c.ell_VV);
-                            debug::print_ell_coeffs(std::cout, prec_P.PY * c.ell_0, prec_P.PX * c.ell_VW, c.ell_VV);
                         }
-                        debug::print_field_element(std::cout, f); std::cout << std::endl;
 
                         c = prec_Q.coeffs[idx];
                         ++idx;
                         if (params_type::twist_type == twist_type::TWIST_TYPE_M) {
                             f = f.mul_by_014(c.ell_0, prec_P.PX * c.ell_VW, prec_P.PY * c.ell_VV);
-                            debug::print_ell_coeffs(std::cout, c.ell_0, prec_P.PX * c.ell_VW, prec_P.PY * c.ell_VV);
                         } else {
                             f = f.mul_by_034(prec_P.PY * c.ell_0, prec_P.PX * c.ell_VW, c.ell_VV);
-                            debug::print_ell_coeffs(std::cout, prec_P.PY * c.ell_0, prec_P.PX * c.ell_VW, c.ell_VV);
                         }
-                        debug::print_field_element(std::cout, f); std::cout << std::endl;
 
                         return f;
                     }
