@@ -55,6 +55,7 @@
 #include <nil/crypto3/algebra/fields/detail/element/fp.hpp>
 #include <nil/crypto3/algebra/fields/detail/element/fp4.hpp>
 #include <nil/crypto3/algebra/fields/detail/element/fp6_2over3.hpp>
+#include <nil/crypto3/algebra/fields/detail/element/fp6_3over2.hpp>
 #include <nil/crypto3/algebra/fields/detail/element/fp12_2over3over2.hpp>
 
 using namespace nil::crypto3::algebra::pairing;
@@ -311,18 +312,17 @@ void print_g2_precomp_element(std::ostream &os,
     print_g2_precomp_element_ell<curves::bls12<377>>(os, e);
 }
 
-void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_policy<curves::mnt4<298>>::g2_precomputed_type &e) {
-    os << "\"coordinates\": {\"QX\": ";
-    print_field_element(os, e.QX);
-    os << ", \"QY\": ";
-    print_field_element(os, e.QY);
-    os << ", \"QY2\": ";
-    print_field_element(os, e.QY2);
-    os << ", \"QX_over_twist\": ";
-    print_field_element(os, e.QX_over_twist);
-    os << ", \"QY_over_twist\": ";
-    print_field_element(os, e.QY_over_twist);
-    os << "}" << std::endl;
+template<typename CurveType>
+void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_policy<CurveType /*curves::mnt4<298>*/>::g2_precomputed_type &e) {
+    os << "{" << std::endl;
+
+    os << "\"coordinates\": {" << std::endl;
+    os << "\"QX\": ";            print_field_element(os, e.QX);            os << "," << std::endl;
+    os << "\"QY\": ";            print_field_element(os, e.QY);            os << "," << std::endl;
+    os << "\"QY2\": ";           print_field_element(os, e.QY2);           os << "," << std::endl;
+    os << "\"QX_over_twist\": "; print_field_element(os, e.QX_over_twist); os << "," << std::endl;
+    os << "\"QY_over_twist\": "; print_field_element(os, e.QY_over_twist); os << std::endl;
+    os << "}," << std::endl;
 
     auto print_dbl_coeff = [&os](const auto &c) {
         os << "{\"c_H\": ";
@@ -343,19 +343,28 @@ void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_
         os << "}" << std::endl;
     };
 
-    os << "dbl_coeffs: ";
-    for (auto &c : e.dbl_coeffs) {
-        print_dbl_coeff(c);
+    os << "\"dbl_coeffs\": ["<< std::endl;;
+    int c;
+    for (c = 0; c< e.dbl_coeffs.size(); ++c){
+        print_dbl_coeff(e.dbl_coeffs[c]);
+        if ( c != e.dbl_coeffs.size()-1 ) {
+            os << "," << std::endl;
+        }
     }
-    std::cout << std::endl;
+    os << "]," << std::endl;
 
-    os << "add_coeffs: ";
-    for (auto &c : e.add_coeffs) {
-        print_add_coeff(c);
+    os << "\"add_coeffs\": [";
+    for (c = 0; c< e.add_coeffs.size(); ++c){
+        print_add_coeff(e.add_coeffs[c]);
+        if ( c != e.add_coeffs.size()-1 ) {
+            os << "," << std::endl;
+        }
     }
-    std::cout << std::endl;
+    os << "]" << std::endl;
+    os << "}" << std::endl;
 }
 
+/*
 void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_policy<curves::mnt6<298>>::g2_precomputed_type &e) {
     os << "{" << std::endl;
 
@@ -407,7 +416,7 @@ void print_g2_precomp_element(std::ostream &os, const typename pairing::pairing_
     os << "]" << std::endl;
     os << "}" << std::endl;
 }
-
+*/
 namespace boost {
     namespace test_tools {
         namespace tt_detail {
@@ -555,7 +564,7 @@ namespace boost {
             template<>
             struct print_log_value<pairing::pairing_policy<curves::mnt4<298>>::g2_precomputed_type> {
                 void operator()(std::ostream &os, const typename pairing::pairing_policy<curves::mnt4<298>>::g2_precomputed_type &e) {
-                    print_g2_precomp_element(os, e);
+                    print_g2_precomp_element<curves::mnt4<298>>(os, e);
                 }
             };
 
@@ -594,7 +603,7 @@ namespace boost {
             template<>
             struct print_log_value<pairing::pairing_policy<curves::mnt6<298>>::g2_precomputed_type> {
                 void operator()(std::ostream &os, const typename pairing::pairing_policy<curves::mnt6<298>>::g2_precomputed_type &e) {
-                    print_g2_precomp_element(os, e);
+                    print_g2_precomp_element<curves::mnt6<298>>(os, e);
                 }
             };
 
@@ -617,31 +626,85 @@ namespace boost {
 }    // namespace boost
 
 
+
 // TODO: add affine_pair_reduceding test
 template<typename CurveType>
 void check_pairing_operations() {
 
     using curve_type = CurveType;
     using scalar_field_type = typename curve_type::scalar_field_type;
+    using base_field_type = typename curve_type::base_field_type;
     using g1_type = typename curve_type::template g1_type<>;
     using g2_type = typename curve_type::template g2_type<>;
     using gt_type = typename curve_type::gt_type;
     using g1_field_value_type = typename g1_type::field_type::value_type;
     using g2_field_value_type = typename g2_type::field_type::value_type;
+    using gt_field_value_type = typename gt_type::value_type;
+    using integral_type = typename base_field_type::integral_type;
+
+#if 0
+    gt_field_value_type T( {0,0},{1,0});
+//    g2_field_value_type T(0,1,0);
+    auto Q = T.pow(integral_type("3"));
+
+    std::cout << "T: " << std::endl;
+    print_field_element(std::cout, T);
+    std::cout << std::endl;
+
+    std::cout << "Q: " << std::endl;
+    print_field_element(std::cout, Q);
+    std::cout << std::endl;
+
+/*
+    std::cout << "G2.a: " << std::endl;
+    print_field_element(std::cout, g2_type::params_type::a);
+    std::cout << std::endl;
 
     std::cout << "G2.b: " << std::endl;
     print_field_element(std::cout, g2_type::params_type::b);
+    std::cout << std::endl;
 
+    auto p = base_field_type::modulus;
+    auto group_order_minus_one_half = (base_field_type::modulus*base_field_type::modulus - 1)/2;
+    std::cout << "P         : " << std::hex << base_field_type::modulus << std::endl;
+    std::cout << "(P^2-1)/2 : " << std::hex << group_order_minus_one_half << std::endl;
+
+    auto nr_check = g2_type::params_type::b;
+    auto b = g2_type::params_type::b;
+
+    auto tmp = b.pow((p-1)/2);
+
+    nr_check = tmp.pow(p).pow(p);
+    nr_check = nr_check*tmp.pow(p)*tmp;
+
+
+    std::cout << "nr_check: " << std::endl;
+    print_field_element(std::cout, nr_check);
+    std::cout << std::endl;
+
+    auto bsq = g2_type::params_type::b.sqrt();
+    std::cout << "bsq: " << std::endl;
+    print_field_element(std::cout, bsq);
+    std::cout << std::endl;
+
+    return;
+*/
+
+    return;
+#endif
+
+/*
     std::cout << "G2 generator:" << std::endl;
     print_curve_group_element_affine(std::cout, g2_type::value_type::one());
-
+    std::cout << std::endl;
+*/
 
     typename scalar_field_type::value_type
         VKx_poly, VKy_poly, VKz_poly,
         A1_poly, B1_poly, C1_poly,
         A2_poly, B2_poly, C2_poly;
 
-#if 0 
+#if 0
     /* generae random elements */
     A1_poly = random_element<scalar_field_type>();
     B1_poly = random_element<scalar_field_type>();
@@ -668,7 +731,7 @@ void check_pairing_operations() {
     VKz_poly = 0x0134ca23d099a7110cb8911d68be121d8d0cd634990b46b169d01b65f14c46b23_cppui254 ;
 #endif
 
-#if 1
+#if 0
     /* BLS12-377 */
     VKx_poly = 0x5a0e34f4a03c673d8b257ea42d40d0db1ae777ebfaa7938be4d8076f2cf7c86_cppui377;
     VKy_poly = 0x66cc192146457adf44fa020cd2e8db8ce5854f5716995567945a901bc309df4_cppui377;
@@ -681,8 +744,22 @@ void check_pairing_operations() {
     C2_poly  = 0x11120c1a5cf0f0243007df5b5bd653794ddec6538b20fd2732fb1b122db5ac2a_cppui377;
 #endif
 
+#if 1
+    /* MNT4-298 */
+    VKx_poly = 0x29794dc75706f12ea30a7fdeb9d43af81a45d68a7be01d297c78c778deec9cb93387ebe12bc_cppui298;
+    VKy_poly = 0x1a29303c45031f874d683968a22ff4942e2f136fada87be10586433ed17f7bf23d151e43bf7_cppui298;
+    VKz_poly = 0x2106f98adc98d263494efdcb141d9ec3194f189acae2c0d61c49b6e6e8df679a5a18c2355d1_cppui298;
+    A1_poly  = 0x164b4a3d781b93b4f88c3800cb2aa593ae68c5fe6216a72c08d853dabe2e163608e1d720c30_cppui298;
+    B1_poly  = 0x0609583bdd59f71f1e1816ee242e690395d534930d7b9745ba17ef4c1255fcc075b5a3d09d3_cppui298;
+    C1_poly  = 0x212ea84d9b5f3fdda38dfdc5cbb84c330e69581dd21dbc92215c6693dcd0c4af1776c2b3c8d_cppui298;
+    A2_poly  = 0x2ff6d5800c1a73bf1762fa4a2b1ee7ff5b28b1c59951fc2c6c75043e81ec2f4fe19ff3b0be7_cppui298;
+    B2_poly  = 0x18de2898617bf7ff59c846b91b20d9ed688f722a8d071da97950a3bb35184c032e43a6ecb78_cppui298;
+    C2_poly  = 0x3a4ead2b787501b521a04a42ef7381ca65a6d4d6e383d1f87e72cd7dc5a83beb12b7acf63ba_cppui298;
+#endif
+
 
 #endif
+
     C1_poly = (A1_poly * B1_poly - VKx_poly * VKy_poly) * VKz_poly.inversed();
     C2_poly = (A2_poly * B2_poly - VKx_poly * VKy_poly) * VKz_poly.inversed();
     /*
@@ -739,11 +816,193 @@ void check_pairing_operations() {
     VKy = G2*VKy_poly;
     VKz = G2*VKz_poly;
 
+    auto base = [](integral_type x, int B) {
+        std::vector<int> res = {(int)(x % B)};
+        if (x > 0) {
+            x /= B;
+            while (x > 0) {
+                res.insert(res.begin(), (int)(x % B) );
+                x /= B;
+            }
+        }
+        return res;
+    };
+
+    using params_type = nil::crypto3::algebra::pairing::detail::pairing_params<curve_type>;
+
+    auto line_double_function = [](
+            gt_field_value_type const& f,
+            typename g2_type::value_type const& T,
+            typename g1_type::value_type const& P)
+    {
+        /* GT = Fp4, X = (x00+u*x01) + v*( x10+u*x11)
+         *
+         * Q.X, Q.Y
+         *
+         *
+         * For MNT4:
+         * u^2 = 17 (0x11)
+         *
+         * v^2 = u
+*
+         * Untwisting: E'(Fpk/d) -> E(Fpk):
+         *
+         * quadratic:
+         * D-twist: ("division")
+         * twisted curve E': y^2 = x^3 +Ax/i^2 + B/i^3
+         * (x,y) -> (ix, i^{3/2}y) = (u x, v^3 y)
+         * M-twist: ("multiplication")
+         * twisted curve E': y^2 = x^3 + i^2Ax + i^3B
+         * (x,y) -> (x/i, i^{1/2}y/i)
+         *
+         */
+        gt_field_value_type x1, y1, x, y, u, v;
+        g2_field_value_type twist;
+        auto aT = T.to_affine();
+        auto aP = P.to_affine();
+
+
+        twist = g2_field_value_type(0,1);
+        u = gt_field_value_type({0,1},{0,0});
+        v = gt_field_value_type({0,0},{1,0});
+
+        aT.X *= twist.inversed();
+        aT.Y *= twist.inversed();
+
+        x1 = gt_field_value_type({aT.X.data[0], aT.X.data[1]}, {0,0})/* * (v*v).inversed()  */;
+        y1 = gt_field_value_type({aT.Y.data[0], aT.Y.data[1]}, {0,0})/* * (v*v*v).inversed()*/;
+
+        x = gt_field_value_type({aP.X, 0}, {0,0}) *u;
+        y = gt_field_value_type({aP.Y, 0}, {0,0}) *u;
+
+        auto three = gt_field_value_type({3,0},{0,0});
+        auto two = gt_field_value_type({2,0},{0,0});
+
+        auto l = three*x1*x1 * (two*y1).inversed();
+        auto mul = ( l*(x-x1) - (y-y1) );
+        
+        return f*f*mul;
+    };
+
+    auto line_add_function = [](
+            gt_field_value_type const& f,
+            typename g2_type::value_type const& T,
+            typename g2_type::value_type const& Q,
+            typename g1_type::value_type const& P)
+    {
+        /* GT = Fp4, X = (x00+u*x01) + v*( x10+u*x11)
+         *
+         * T.X, T.Y
+         * T.X/u T.Y/(v*u)
+         *
+         */
+        gt_field_value_type x1, y1, x2, y2, x, y, u, v;
+        auto aT = T.to_affine();
+        auto aQ = Q.to_affine();
+        auto aP = P.to_affine();
+
+        g2_field_value_type twist;
+        twist = g2_field_value_type(0,1);
+        u = gt_field_value_type({0,1},{0,0});
+        v = gt_field_value_type({0,0},{1,0});
+        
+        aT.X *= twist.inversed();
+        aT.Y *= twist.inversed();
+        aQ.X *= twist.inversed();
+        aQ.Y *= twist.inversed();
+
+        x1 = gt_field_value_type({aT.X.data[0], aT.X.data[1]}, {0,0})/* * (v*v).inversed()  */;
+        y1 = gt_field_value_type({aT.Y.data[0], aT.Y.data[1]}, {0,0})/* * (v*v*v).inversed()*/;
+
+        x2 = gt_field_value_type({aQ.X.data[0], aQ.X.data[1]}, {0,0})/* * (v*v).inversed()  */;
+        y2 = gt_field_value_type({aQ.Y.data[0], aQ.Y.data[1]}, {0,0})/* * (v*v*v).inversed()*/;
+        /*
+        std::cout << " x1 :"; print_field_element(std::cout, x1);  std::cout << std::endl;
+        std::cout << " x2 :"; print_field_element(std::cout, x2);  std::cout << std::endl;
+        std::cout << " y1 :"; print_field_element(std::cout, y1);  std::cout << std::endl;
+        std::cout << " y2 :"; print_field_element(std::cout, y2);  std::cout << std::endl;
+
+        */
+        x = gt_field_value_type({aP.X, 0}, {0,0}) * u;
+        y = gt_field_value_type({aP.Y, 0}, {0,0}) * u;
+
+        /*
+        std::cout << " x :"; print_field_element(std::cout, x);  std::cout << std::endl;
+        std::cout << " y :"; print_field_element(std::cout, y);  std::cout << std::endl;
+
+        */
+        if ( (x1 == x2) && (y1 == -y2)) {
+            return f*(x-x1);
+        } else {
+            auto l = (y2-y1)*(x2-x1).inversed();
+            //std::cout << " l  :"; print_field_element(std::cout, l);  std::cout << std::endl;
+            return f*( l*(x-x1) - (y-y1) );
+        }
+    };
+
+
+    auto miller_loop = [&base, &line_double_function, &line_add_function]
+        (typename g1_type::value_type const& P, typename g2_type::value_type const& Q)
+    {
+        typename g2_type::value_type T = Q;
+        gt_field_value_type f = gt_field_value_type::one();
+
+        std::vector<int> C = base(params_type::ate_loop_count, 2);
+        for(std::size_t i = 1; i < C.size(); ++i) {
+            std::cout << i << " start :"; print_field_element(std::cout, f);  std::cout << std::endl;
+            f = line_double_function(f, T, P);
+            std::cout << i << " dbl   :"; print_field_element(std::cout, f);  std::cout << std::endl;
+            T = T + T;
+            if (1 == C[i]) {
+                f = line_add_function(f, T, Q, P);
+                std::cout << i << " add   :"; print_field_element(std::cout, f);  std::cout << std::endl;
+                T = T + Q;
+            }
+        }
+        return f;
+    };
+
+    auto final_exp = [](gt_field_value_type const& f) {
+        return f.pow(params_type::final_exponent);
+    };
+
+    auto A1_B1 = final_exp(miller_loop(A1, B1));
+    auto A2_B2 = miller_loop(A2, B2);
+
+    /* C*VKz = A*B - VKx*VKy */
+    auto C1_pair = final_exp(miller_loop(VKx, VKy)*miller_loop(C1, VKz));
+
+    typename params_type::extended_integral_type fe, p, w0;
+    p = g1_field_value_type::modulus;
+    w0 = params_type::final_exponent_last_chunk_abs_of_w0;
+
+    fe = (p*p-1)*(p+w0);
+
+    if (fe == params_type::final_exponent) {
+        std::cout << "final exp is [32;1mOK[0m!" << std::endl;
+    } else {
+        std::cout << "final exp is [31;1mNOT OK[0m!" << std::endl;
+    }
+
+    std::cout << "A1B1    :"; print_field_element(std::cout, A1_B1);  std::cout << std::endl;
+    std::cout << "A2B2    :"; print_field_element(std::cout, A2_B2);  std::cout << std::endl;
+
+    if(A1_B1 == C1_pair) {
+        std::cout << "C2 check [32;1mSUCCESSFUL[0m!" << std::endl;
+    } else {
+        std::cout << "C2 check [31;1mUNSUCCESSFUL[0m!" << std::endl;
+    }
+
+//    auto A1_B1_p = pair_reduced<curve_type>(A1, B1);
+//    auto A2_B2_p = pair_reduced<curve_type>(A2, B2);
+
+#if 0
+
     auto prec_A1 = precompute_g1<curve_type>(A1);
     auto prec_A2 = precompute_g1<curve_type>(A2);
     auto prec_B1 = precompute_g2<curve_type>(B1);
     auto prec_B2 = precompute_g2<curve_type>(B2);
-     //std::cerr << "------------" << std::endl;
+    //std::cerr << "------------" << std::endl;
 
     std::ofstream json("output.json");
     json << "{";
@@ -841,11 +1100,13 @@ void check_pairing_operations() {
     json << "]," << std::endl;
 
     json << "\"g2_precomputed_type\": [" << std::endl;
-    print_g2_precomp_element(json, prec_B1); json << "," << std::endl;
-    print_g2_precomp_element(json, prec_B2);
+    print_g2_precomp_element<CurveType>(json, prec_B1); json << "," << std::endl;
+    print_g2_precomp_element<CurveType>(json, prec_B2);
     json << "]" << std::endl;
 
     json << "}";
+#endif
+
 }
 
 /*
@@ -893,9 +1154,9 @@ void check_curve() {
 
 BOOST_AUTO_TEST_SUITE(pairing_debug_tests)
 BOOST_AUTO_TEST_CASE(pairing_operation_test_atl_bn128_254) {
-    using curve_type = typename curves::alt_bn128_254;
-    //using curve_type = typename curves::mnt4<298>;
-    //using curve_type = typename curves::mnt6<298>;
+//    using curve_type = typename curves::alt_bn128_254;
+    using curve_type = typename curves::mnt4<298>;
+//    using curve_type = typename curves::mnt6<298>;
     //using curve_type = typename curves::bls12<381>;
 //    using curve_type = typename curves::bls12<377>;
 

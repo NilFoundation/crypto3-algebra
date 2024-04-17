@@ -38,6 +38,44 @@ namespace nil {
         namespace algebra {
             namespace pairing {
 
+                namespace debug {
+                template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename fields::detail::element_fp<FieldParams> &e) {
+//    os << std::hex <<"0x"<< std::setw((FieldParams::modulus_bits+7)/4) << std::setfill('0') << e.data << "_cppui" << std::dec << FieldParams::modulus_bits << " ";
+    os << '"' << e.data << '"' ;
+}
+
+template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename fields::detail::element_fp2<FieldParams> &e) {
+    os << "[";
+    print_field_element(os, e.data[0]);
+    os << ", ";
+    print_field_element(os, e.data[1]);
+    os << "]";
+}
+
+template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename fields::detail::element_fp3<FieldParams> &e) {
+    os << "[";
+    print_field_element(os, e.data[0]);
+    os << ", ";
+    print_field_element(os, e.data[1]);
+    os << ", ";
+    print_field_element(os, e.data[2]);
+    os << "]";
+}
+
+template<typename FieldParams>
+void print_field_element(std::ostream &os, const typename fields::detail::element_fp4<FieldParams> &e) {
+    os << "[";
+    print_field_element(os, e.data[0]);
+    os << ", ";
+    print_field_element(os, e.data[1]);
+    os << "]";
+}
+}
+
+
                 template<std::size_t Version = 298>
                 class mnt4_ate_miller_loop;
 
@@ -86,13 +124,19 @@ namespace nil {
 
                             typename gt_type::value_type g_RR_at_P = typename gt_type::value_type(
                                 -dc.c_4C - dc.c_J * prec_P.PX_twist + dc.c_L, dc.c_H * prec_P.PY_twist);
+                            std::cout << " === " << i << "==="  << std::endl;
+                            std::cout << " f     : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
+                            std::cout << " l dbl : "; debug::print_field_element(std::cout, g_RR_at_P); std::cout << std::endl;
                             f = f.squared() * g_RR_at_P;
+                            std::cout << " f^2*l : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
                             if (bit) {
                                 typename policy_type::ate_add_coeffs ac = prec_Q.add_coeffs[add_idx++];
 
                                 typename gt_type::value_type g_RQ_at_P = typename gt_type::value_type(
                                     ac.c_RZ * prec_P.PY_twist, -(prec_Q.QY_over_twist * ac.c_RZ + L1_coeff * ac.c_L1));
+                                std::cout << " l add : "; debug::print_field_element(std::cout, g_RQ_at_P); std::cout << std::endl;
                                 f = f * g_RQ_at_P;
+                                std::cout << " f*l   : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
                             }
                         }
 

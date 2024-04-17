@@ -26,11 +26,13 @@
 #ifndef CRYPTO3_ALGEBRA_CURVES_MNT4_TYPES_HPP
 #define CRYPTO3_ALGEBRA_CURVES_MNT4_TYPES_HPP
 
-#include <nil/crypto3/algebra/fields/mnt4/base_field.hpp>
-#include <nil/crypto3/algebra/fields/mnt4/scalar_field.hpp>
+#include <cstddef>
 
 #include <nil/crypto3/algebra/fields/fp2.hpp>
 #include <nil/crypto3/algebra/fields/fp4.hpp>
+
+#include <nil/crypto3/algebra/fields/mnt4/base_field.hpp>
+#include <nil/crypto3/algebra/fields/mnt4/scalar_field.hpp>
 
 namespace nil {
     namespace crypto3 {
