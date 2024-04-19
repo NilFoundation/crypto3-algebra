@@ -124,19 +124,19 @@ void print_field_element(std::ostream &os, const typename fields::detail::elemen
 
                             typename gt_type::value_type g_RR_at_P = typename gt_type::value_type(
                                 -dc.c_4C - dc.c_J * prec_P.PX_twist + dc.c_L, dc.c_H * prec_P.PY_twist);
-                            std::cout << " === " << i << "==="  << std::endl;
-                            std::cout << " f     : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
-                            std::cout << " l dbl : "; debug::print_field_element(std::cout, g_RR_at_P); std::cout << std::endl;
+//                            std::cout << " === " << i << "==="  << std::endl;
+//                            std::cout << " f     : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
+//                            std::cout << " l dbl : "; debug::print_field_element(std::cout, g_RR_at_P); std::cout << std::endl;
                             f = f.squared() * g_RR_at_P;
-                            std::cout << " f^2*l : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
+//                            std::cout << " f^2*l : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
                             if (bit) {
                                 typename policy_type::ate_add_coeffs ac = prec_Q.add_coeffs[add_idx++];
 
                                 typename gt_type::value_type g_RQ_at_P = typename gt_type::value_type(
                                     ac.c_RZ * prec_P.PY_twist, -(prec_Q.QY_over_twist * ac.c_RZ + L1_coeff * ac.c_L1));
-                                std::cout << " l add : "; debug::print_field_element(std::cout, g_RQ_at_P); std::cout << std::endl;
+//                                std::cout << " l add : "; debug::print_field_element(std::cout, g_RQ_at_P); std::cout << std::endl;
                                 f = f * g_RQ_at_P;
-                                std::cout << " f*l   : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
+//                                std::cout << " f*l   : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
                             }
                         }
 
@@ -147,6 +147,7 @@ void print_field_element(std::ostream &os, const typename fields::detail::elemen
                             f = (f * g_RnegR_at_P).inversed();
                         }
 
+//                        std::cout << " final f   : "; debug::print_field_element(std::cout, f); std::cout << std::endl;
                         return f;
                     }
                 };

@@ -48,6 +48,7 @@
 #include <nil/crypto3/algebra/pairing/bls12.hpp>
 #include <nil/crypto3/algebra/pairing/mnt4.hpp>
 #include <nil/crypto3/algebra/pairing/mnt6.hpp>
+#include <nil/crypto3/algebra/curves/detail/mnt4/types.hpp>
 
 #include <nil/crypto3/algebra/algorithms/pair.hpp>
 #include <nil/crypto3/algebra/random_element.hpp>
@@ -64,8 +65,8 @@ using namespace nil::crypto3::multiprecision;
 
 template<typename FieldParams>
 void print_field_element(std::ostream &os, const typename fields::detail::element_fp<FieldParams> &e) {
-//    os << std::hex <<"0x"<< std::setw((FieldParams::modulus_bits+7)/4) << std::setfill('0') << e.data << "_cppui" << std::dec << FieldParams::modulus_bits << " ";
-    os << '"' << e.data << '"' ;
+    os << std::hex <<"0x"<< std::setw((FieldParams::modulus_bits+7)/4) << std::setfill('0') << e.data << "_cppui" << std::dec << FieldParams::modulus_bits << " ";
+//    os << '"' << e.data << '"' ;
 }
 
 template<typename FieldParams>
@@ -643,9 +644,9 @@ void check_pairing_operations() {
     using integral_type = typename base_field_type::integral_type;
 
 #if 0
-    gt_field_value_type T( {0,0},{1,0});
-//    g2_field_value_type T(0,1,0);
-    auto Q = T.pow(integral_type("3"));
+    gt_field_value_type T({2,3},{4,5}), u({0,1},{0,0}), v({0,0},{1,0});
+    //    g2_field_value_type T(0,1,0);
+    auto Q = T*(u*v).inversed();
 
     std::cout << "T: " << std::endl;
     print_field_element(std::cout, T);
@@ -830,7 +831,134 @@ void check_pairing_operations() {
 
     using params_type = nil::crypto3::algebra::pairing::detail::pairing_params<curve_type>;
 
-    auto line_double_function = [](
+    /*
+     * For MNT4:
+     * E/Fp  : y^2 = x^3 + a*x + b, has q points
+     * E/Fp4 : y^2 = x^3 + a*x + b, this is the same curve, but it has more points (q^4-1?)
+     *
+     * E'/Fp2 : y^2 = x^3 + a'*x + b', has q points
+     *
+     * MNT4:
+     * a=2
+     * b=0x3545A27639415585EA4D523234FC3EDD2A2070A085C7B980F4E9CD21A515D4B0EF528EC0FD5
+     *
+     * a' = nr*a + 0 = u^2*a
+     * b' = 0 + nr*b*u = u^3*b (u^2 = nr = 17)
+     *
+     * untwist: mapping from E'/Fp2 -> E/Fp4
+     *
+     * x(Fp2) -> u*x (Fp4)
+     * y(Fp2) -> u*v*y (Fp4)
+     *
+     * (uvy)^2 = u^2v^2y^2 = nr*u*y^2
+     * (ux)^3 = nr*u*x^3
+     * a'*(ux) = nr*u*x
+     * b' = nr*u*b
+     *
+     * So: nr*u*y^2 =?= nr*u*x^3 + nr*u*x*a + nr*u*b
+     * Definitely is!
+     */
+    auto untwist_g2 = [](
+            typename g2_type::value_type const& T,
+            gt_field_value_type & x,
+            gt_field_value_type & y) {
+        auto aT = T.to_affine();
+
+        auto u = gt_field_value_type({0,1},{0,0});
+        auto v = gt_field_value_type({0,0},{1,0});
+
+//        auto twist_x = (v).inversed();
+//        auto twist_y = (v*v*v).inversed();
+        auto twist_x = u.inversed();
+        auto twist_y = (u*v).inversed();
+
+        x = gt_field_value_type({aT.X.data[0], aT.X.data[1]}, {0,0}) * twist_x;
+        y = gt_field_value_type({aT.Y.data[0], aT.Y.data[1]}, {0,0}) * twist_y;
+    };
+
+#if 0
+    auto check_on_E_g1 = [](
+            g1_field_value_type const& x,
+            g1_field_value_type const& y) {
+
+        return y*y == x*x*x + g1_type::params_type::a*x +g1_type::params_type::b;
+    };
+
+    auto check_on_E_g2 = [](
+            g2_field_value_type const& x,
+            g2_field_value_type const& y) {
+
+        return y*y == x*x*x + g2_type::params_type::a*x +g2_type::params_type::b;
+    };
+
+    auto check_on_E_gt = [](
+            gt_field_value_type const& x,
+            gt_field_value_type const& y) {
+
+        gt_field_value_type A = gt_field_value_type({g1_type::params_type::a, 0}, {0, 0});
+        gt_field_value_type B = gt_field_value_type({g1_type::params_type::b, 0}, {0, 0});
+
+        return y*y == x*x*x + A*x +B;
+    };
+
+    auto check_on_E_prim_gt = [](
+            gt_field_value_type const& x,
+            gt_field_value_type const& y) {
+
+        gt_field_value_type A = gt_field_value_type(g2_type::params_type::a, {0, 0});
+        gt_field_value_type B = gt_field_value_type(g2_type::params_type::b, {0, 0});
+
+        return y*y == x*x*x + A*x +B;
+    };
+
+    auto aA1 = A1.to_affine();
+    auto aB1 = B1.to_affine();
+
+    std::cout << "Points on curves check:" << std::endl;
+
+    std::cout << "A1   : " << check_on_E_g1(aA1.X, aA1.Y) << std::endl;
+    std::cout << "B1   : " << check_on_E_g2(aB1.X, aB1.Y) << std::endl;
+
+    gt_field_value_type ux, uy;
+    untwist_g2(B1, ux, uy);
+    std::cout << "u B1 : " << check_on_E_gt(ux, uy) << std::endl;
+
+    std::cout << "untwisted x: "; print_field_element(std::cout, ux); std::cout << std::endl;
+    std::cout << "untwisted y: "; print_field_element(std::cout, uy); std::cout << std::endl;
+
+    auto u = gt_field_value_type({0,1},{0,0});
+    auto v = gt_field_value_type({0,0},{1,0});
+
+    auto nru = u*u*u;
+
+    // (uvy)^2 = u^3*y^2 = nru*y^2
+    auto uvy2 = (u*v*gt_field_value_type(aB1.Y, {0,0})).squared();
+    std::cout << "uvy2     : "; print_field_element(std::cout, uvy2); std::cout << std::endl;
+    uvy2 = uvy2 * nru.inversed();
+    std::cout << "uvy2/nru : "; print_field_element(std::cout, uvy2); std::cout << std::endl;
+
+    auto ux3 = ux.pow(3);
+    std::cout << "ux3      : "; print_field_element(std::cout, ux3); std::cout << std::endl;
+    ux3 = ux3 * nru.inversed();
+    std::cout << "ux3/nru  : "; print_field_element(std::cout, ux3); std::cout << std::endl;
+
+
+    gt_field_value_type gtA = gt_field_value_type({g1_type::params_type::a, 0}, {0, 0});
+    gt_field_value_type gtB = gt_field_value_type({g1_type::params_type::b, 0}, {0, 0});
+
+    auto aux = ux*gtA;
+    std::cout << "aux      : "; print_field_element(std::cout, aux); std::cout << std::endl;
+    aux = aux * nru.inversed();
+    std::cout << "ux3/nru  : "; print_field_element(std::cout, aux); std::cout << std::endl;
+
+
+    return;
+
+#endif
+
+
+#if 1
+    auto line_double_function = [&untwist_g2](
             gt_field_value_type const& f,
             typename g2_type::value_type const& T,
             typename g1_type::value_type const& P)
@@ -844,7 +972,7 @@ void check_pairing_operations() {
          * u^2 = 17 (0x11)
          *
          * v^2 = u
-*
+         *
          * Untwisting: E'(Fpk/d) -> E(Fpk):
          *
          * quadratic:
@@ -861,87 +989,48 @@ void check_pairing_operations() {
         auto aT = T.to_affine();
         auto aP = P.to_affine();
 
+        untwist_g2(T, x1, y1);
 
-        twist = g2_field_value_type(0,1);
-        u = gt_field_value_type({0,1},{0,0});
-        v = gt_field_value_type({0,0},{1,0});
-
-        aT.X *= twist.inversed();
-        aT.Y *= twist.inversed();
-
-        x1 = gt_field_value_type({aT.X.data[0], aT.X.data[1]}, {0,0})/* * (v*v).inversed()  */;
-        y1 = gt_field_value_type({aT.Y.data[0], aT.Y.data[1]}, {0,0})/* * (v*v*v).inversed()*/;
-
-        x = gt_field_value_type({aP.X, 0}, {0,0}) *u;
-        y = gt_field_value_type({aP.Y, 0}, {0,0}) *u;
+        x = gt_field_value_type({aP.X, 0}, {0,0});
+        y = gt_field_value_type({aP.Y, 0}, {0,0});
 
         auto three = gt_field_value_type({3,0},{0,0});
         auto two = gt_field_value_type({2,0},{0,0});
 
-        auto l = three*x1*x1 * (two*y1).inversed();
+        gt_field_value_type gtA = gt_field_value_type({g1_type::params_type::a, 0}, {0, 0});
+
+        auto l = (three*x1*x1 + gtA)* (two*y1).inversed();
         auto mul = ( l*(x-x1) - (y-y1) );
         
         return f*f*mul;
     };
 
-    auto line_add_function = [](
+    auto line_add_function = [&untwist_g2](
             gt_field_value_type const& f,
             typename g2_type::value_type const& T,
             typename g2_type::value_type const& Q,
             typename g1_type::value_type const& P)
     {
-        /* GT = Fp4, X = (x00+u*x01) + v*( x10+u*x11)
-         *
-         * T.X, T.Y
-         * T.X/u T.Y/(v*u)
-         *
-         */
         gt_field_value_type x1, y1, x2, y2, x, y, u, v;
         auto aT = T.to_affine();
         auto aQ = Q.to_affine();
         auto aP = P.to_affine();
 
-        g2_field_value_type twist;
-        twist = g2_field_value_type(0,1);
-        u = gt_field_value_type({0,1},{0,0});
-        v = gt_field_value_type({0,0},{1,0});
-        
-        aT.X *= twist.inversed();
-        aT.Y *= twist.inversed();
-        aQ.X *= twist.inversed();
-        aQ.Y *= twist.inversed();
+        untwist_g2(T, x1, y1);
+        untwist_g2(Q, x2, y2);
+        x = gt_field_value_type({aP.X, 0}, {0,0});
+        y = gt_field_value_type({aP.Y, 0}, {0,0});
 
-        x1 = gt_field_value_type({aT.X.data[0], aT.X.data[1]}, {0,0})/* * (v*v).inversed()  */;
-        y1 = gt_field_value_type({aT.Y.data[0], aT.Y.data[1]}, {0,0})/* * (v*v*v).inversed()*/;
-
-        x2 = gt_field_value_type({aQ.X.data[0], aQ.X.data[1]}, {0,0})/* * (v*v).inversed()  */;
-        y2 = gt_field_value_type({aQ.Y.data[0], aQ.Y.data[1]}, {0,0})/* * (v*v*v).inversed()*/;
-        /*
-        std::cout << " x1 :"; print_field_element(std::cout, x1);  std::cout << std::endl;
-        std::cout << " x2 :"; print_field_element(std::cout, x2);  std::cout << std::endl;
-        std::cout << " y1 :"; print_field_element(std::cout, y1);  std::cout << std::endl;
-        std::cout << " y2 :"; print_field_element(std::cout, y2);  std::cout << std::endl;
-
-        */
-        x = gt_field_value_type({aP.X, 0}, {0,0}) * u;
-        y = gt_field_value_type({aP.Y, 0}, {0,0}) * u;
-
-        /*
-        std::cout << " x :"; print_field_element(std::cout, x);  std::cout << std::endl;
-        std::cout << " y :"; print_field_element(std::cout, y);  std::cout << std::endl;
-
-        */
         if ( (x1 == x2) && (y1 == -y2)) {
             return f*(x-x1);
         } else {
             auto l = (y2-y1)*(x2-x1).inversed();
-            //std::cout << " l  :"; print_field_element(std::cout, l);  std::cout << std::endl;
             return f*( l*(x-x1) - (y-y1) );
         }
     };
 
 
-    auto miller_loop = [&base, &line_double_function, &line_add_function]
+    auto local_miller_loop = [&base, &line_double_function, &line_add_function]
         (typename g1_type::value_type const& P, typename g2_type::value_type const& Q)
     {
         typename g2_type::value_type T = Q;
@@ -949,16 +1038,17 @@ void check_pairing_operations() {
 
         std::vector<int> C = base(params_type::ate_loop_count, 2);
         for(std::size_t i = 1; i < C.size(); ++i) {
-            std::cout << i << " start :"; print_field_element(std::cout, f);  std::cout << std::endl;
+//            std::cout << i << " start :"; print_field_element(std::cout, f);  std::cout << std::endl;
             f = line_double_function(f, T, P);
-            std::cout << i << " dbl   :"; print_field_element(std::cout, f);  std::cout << std::endl;
+//            std::cout << i << " dbl   :"; print_field_element(std::cout, f);  std::cout << std::endl;
             T = T + T;
             if (1 == C[i]) {
                 f = line_add_function(f, T, Q, P);
-                std::cout << i << " add   :"; print_field_element(std::cout, f);  std::cout << std::endl;
+//                std::cout << i << " add   :"; print_field_element(std::cout, f);  std::cout << std::endl;
                 T = T + Q;
             }
         }
+//        std::cout << " ML result   :"; print_field_element(std::cout, f);  std::cout << std::endl;
         return f;
     };
 
@@ -966,11 +1056,16 @@ void check_pairing_operations() {
         return f.pow(params_type::final_exponent);
     };
 
-    auto A1_B1 = final_exp(miller_loop(A1, B1));
-    auto A2_B2 = miller_loop(A2, B2);
+    auto A1_B1 = local_miller_loop(A1, -B1);
+    std::cout << " A1_B1   ML  :"; print_field_element(std::cout, A1_B1);  std::cout << std::endl;
+//    A1_B1 = final_exp(A1_B1);
 
+//    auto A2_B2 = miller_loop(A2, B2);
+//
     /* C*VKz = A*B - VKx*VKy */
-    auto C1_pair = final_exp(miller_loop(VKx, VKy)*miller_loop(C1, VKz));
+    auto C1_pair = local_miller_loop(VKx, VKy)*local_miller_loop(C1, VKz);
+    std::cout << " C1_pair ML  :"; print_field_element(std::cout, C1_pair);  std::cout << std::endl;
+  //  C1_pair = final_exp(C1_pair);
 
     typename params_type::extended_integral_type fe, p, w0;
     p = g1_field_value_type::modulus;
@@ -984,14 +1079,23 @@ void check_pairing_operations() {
         std::cout << "final exp is [31;1mNOT OK[0m!" << std::endl;
     }
 
-    std::cout << "A1B1    :"; print_field_element(std::cout, A1_B1);  std::cout << std::endl;
-    std::cout << "A2B2    :"; print_field_element(std::cout, A2_B2);  std::cout << std::endl;
+    auto final_ml = A1_B1*C1_pair;
+    std::cout << "final_ml        :"; print_field_element(std::cout, final_ml);  std::cout << std::endl;
+    final_ml = final_exp(final_ml);
+    std::cout << "the end         :"; print_field_element(std::cout, final_ml);  std::cout << std::endl;
 
-    if(A1_B1 == C1_pair) {
-        std::cout << "C2 check [32;1mSUCCESSFUL[0m!" << std::endl;
-    } else {
-        std::cout << "C2 check [31;1mUNSUCCESSFUL[0m!" << std::endl;
-    }
+    return;
+
+#endif
+//    std::cout << "(A1,B1)         :"; print_field_element(std::cout, A1_B1);  std::cout << std::endl;
+//    std::cout << "(Vx,Vy)*(C1,Vz) :"; print_field_element(std::cout, C1_pair);  std::cout << std::endl;
+//    std::cout << "A2B2    :"; print_field_element(std::cout, A2_B2);  std::cout << std::endl;
+
+//    if(A1_B1 == C1_pair) {
+//        std::cout << "C2 check [32;1mSUCCESSFUL[0m!" << std::endl;
+//    } else {
+//        std::cout << "C2 check [31;1mUNSUCCESSFUL[0m!" << std::endl;
+//    }
 
 //    auto A1_B1_p = pair_reduced<curve_type>(A1, B1);
 //    auto A2_B2_p = pair_reduced<curve_type>(A2, B2);
