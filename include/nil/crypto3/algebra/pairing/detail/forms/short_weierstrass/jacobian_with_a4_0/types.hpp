@@ -26,11 +26,16 @@
 #ifndef CRYPTO3_ALGEBRA_PAIRING_SHORT_WEIERSTRASS_JACOBIAN_WITH_A4_0_TYPES_POLICY_HPP
 #define CRYPTO3_ALGEBRA_PAIRING_SHORT_WEIERSTRASS_JACOBIAN_WITH_A4_0_TYPES_POLICY_HPP
 
+#include <vector>
+
 namespace nil {
     namespace crypto3 {
         namespace algebra {
             namespace pairing {
                 namespace detail {
+
+                    template<typename CurveType>
+                    class pairing_params;
 
                     template<typename CurveType>
                     class short_weierstrass_jacobian_with_a4_0_types_policy {
@@ -67,6 +72,8 @@ namespace nil {
 
                         struct ate_g2_precomputed_type {
                             using coeffs_type = ate_ell_coeffs;
+
+                            bool is_zero;
 
                             g2_field_value_type QX;
                             g2_field_value_type QY;

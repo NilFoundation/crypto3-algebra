@@ -26,6 +26,8 @@
 #ifndef CRYPTO3_ALGEBRA_CURVES_ALT_BN128_TYPES_HPP
 #define CRYPTO3_ALGEBRA_CURVES_ALT_BN128_TYPES_HPP
 
+#include <cstddef>
+
 #include <nil/crypto3/algebra/fields/alt_bn128/base_field.hpp>
 #include <nil/crypto3/algebra/fields/alt_bn128/scalar_field.hpp>
 
