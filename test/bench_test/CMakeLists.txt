@@ -12,11 +12,11 @@ if(NOT Boost_UNIT_TEST_FRAMEWORK_FOUND)
     cm_find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 endif()
 
-add_custom_target(algebra_runtime_bench_tests)
+add_custom_target(${CURRENT_PROJECT_NAME}_bench)
 
-macro(define_runtime_algebra_test name)
-    set(test_name "algebra_${name}_bench_test")
-    add_dependencies(algebra_runtime_bench_tests ${test_name})
+macro(define_bench name)
+    set(test_name "algebra_${name}_bench")
+    add_dependencies(${CURRENT_PROJECT_NAME}_bench ${test_name})
 
     set(additional_args "")
     if(ENABLE_JUNIT_TEST_OUTPUT)
@@ -56,11 +56,11 @@ macro(define_runtime_algebra_test name)
 endmacro()
 
 set(RUNTIME_TESTS_NAMES
-    "bench_curves"
-    "bench_fields"
+    "curves"
+    "fields"
     )
 
 foreach(TEST_NAME ${RUNTIME_TESTS_NAMES})
-    define_runtime_algebra_test(${TEST_NAME})
+    define_bench(${TEST_NAME})
 endforeach()
 
