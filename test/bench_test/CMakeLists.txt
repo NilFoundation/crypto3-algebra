@@ -12,6 +12,9 @@ if(NOT Boost_UNIT_TEST_FRAMEWORK_FOUND)
     cm_find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 endif()
 
+cm_test_link_libraries(${CMAKE_WORKSPACE_NAME}_${CURRENT_PROJECT_NAME}
+                       ${CMAKE_WORKSPACE_NAME}::multiprecision)
+
 add_custom_target(${CURRENT_PROJECT_NAME}_bench)
 
 macro(define_bench name)
