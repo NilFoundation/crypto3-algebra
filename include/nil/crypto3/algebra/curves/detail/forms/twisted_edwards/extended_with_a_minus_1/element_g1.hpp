@@ -164,7 +164,7 @@ namespace nil {
                          * @return true if element from group G1 is the point at infinity
                          */
                         constexpr bool is_zero() const {
-                            return (this->X.is_zero() && this->T.is_zero() && this->Z.is_zero());
+                            return this->X.is_zero() && this->T.is_zero();
                         }
 
                         /** @brief
