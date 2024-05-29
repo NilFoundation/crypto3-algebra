@@ -131,80 +131,80 @@ namespace nil {
                         0x183227397098D014DC2822DB40C0AC2E9419F4243CDCB848A1F0FAC9F8000000_cppui_modular254;
                 };
 
-                constexpr std::size_t const arithmetic_params<bn128_base_field<254>>::s;
-                constexpr std::size_t const arithmetic_params<fp2<bn128_base_field<254>>>::s;
-                constexpr std::size_t const arithmetic_params<bn128_scalar_field<254>>::s;
+                template<> constexpr std::size_t const arithmetic_params<bn128_base_field<254>>::s;
+                template<> constexpr std::size_t const arithmetic_params<fp2<bn128_base_field<254>>>::s;
+                template<> constexpr std::size_t const arithmetic_params<bn128_scalar_field<254>>::s;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::t;
-                constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::extended_integral_type const
+                template<> constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::extended_integral_type const
                     arithmetic_params<fp2<bn128_base_field<254>>>::t;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::t;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::t_minus_1_over_2;
-                constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::extended_integral_type const
+                template<> constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::extended_integral_type const
                     arithmetic_params<fp2<bn128_base_field<254>>>::t_minus_1_over_2;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::t_minus_1_over_2;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::arithmetic_generator;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::arithmetic_generator;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::geometric_generator;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::geometric_generator;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::multiplicative_generator;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::multiplicative_generator;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::root_of_unity;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::root_of_unity;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::nqr;
-                constexpr std::array<typename arithmetic_params<fp2<bn128_base_field<254>>>::integral_type, 2> const
+                template<> constexpr std::array<typename arithmetic_params<fp2<bn128_base_field<254>>>::integral_type, 2> const
                     arithmetic_params<fp2<bn128_base_field<254>>>::nqr;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::nqr;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::nqr_to_t;
-                constexpr std::array<typename arithmetic_params<fp2<bn128_base_field<254>>>::integral_type, 2> const
+                template<> constexpr std::array<typename arithmetic_params<fp2<bn128_base_field<254>>>::integral_type, 2> const
                     arithmetic_params<fp2<bn128_base_field<254>>>::nqr_to_t;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::nqr_to_t;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::Rsquared;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::Rsquared;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::Rcubed;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::Rcubed;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::modulus;
-                constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::integral_type const
+                template<> constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::integral_type const
                     arithmetic_params<fp2<bn128_base_field<254>>>::modulus;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::modulus;
 
-                constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_base_field<254>>::integral_type const
                     arithmetic_params<bn128_base_field<254>>::group_order;
-                constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::extended_integral_type const
+                template<> constexpr typename arithmetic_params<fp2<bn128_base_field<254>>>::extended_integral_type const
                     arithmetic_params<fp2<bn128_base_field<254>>>::group_order;
-                constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
+                template<> constexpr typename arithmetic_params<bn128_scalar_field<254>>::integral_type const
                     arithmetic_params<bn128_scalar_field<254>>::group_order;
 
             }    // namespace fields
